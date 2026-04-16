@@ -1,0 +1,2151 @@
+{{-- resources/views/layouts/msit/structure.blade.php --}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>@yield('title','MSIT Home Builder Admin')</title>
+
+  <meta name="csrf-token" content="{{ csrf_token() }}"/>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/images/favicon/msit_logo.jpg') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ asset('/assets/css/common/main.css') }}">
+
+  @stack('styles')
+  @yield('styles')
+
+  <style>
+    :root{
+      --w3-rail-w: 236px;
+      --w3-rail-bg: var(--surface);
+      --w3-rail-text: var(--text-color);
+      --w3-rail-muted: var(--muted-color);
+      --w3-rail-border: var(--line-strong);
+      --w3-rail-hover: rgba(139,46,58,.05);
+      --w3-rail-active: rgba(139,46,58,.10);
+      --w3-appbar-h: 52px;
+
+      --w3-rule-grad-l: linear-gradient(90deg, rgba(2,6,23,0), rgba(2,6,23,.12), rgba(2,6,23,0));
+      --w3-rule-grad-d: linear-gradient(90deg, rgba(226,232,240,0), rgba(226,232,240,.18), rgba(226,232,240,0));
+    }
+
+    body{
+      min-height:100dvh;
+      background:var(--bg-body);
+      color:var(--text-color);
+      overflow-x:hidden;
+    }
+
+    .w3-sidebar{
+      position:fixed;
+      inset:0 auto 0 0;
+      width:var(--w3-rail-w);
+      background:var(--w3-rail-bg);
+      border-right:1px solid var(--w3-rail-border);
+      display:flex;
+      flex-direction:column;
+      z-index:1041;
+      transform:translateX(0);
+      transition:transform .24s ease;
+    }
+
+    .w3-sidebar-head{
+      height:var(--w3-appbar-h);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px 10px;
+      border-bottom:1px solid var(--w3-rail-border);
+      flex-shrink:0;
+    }
+
+    .w3-brand{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      width:100%;
+    }
+
+    .w3-brand img{
+      height:40px;
+      width:auto;
+      max-width:150px;
+      display:block;
+    }
+
+    .w3-sidebar-scroll{
+      flex:1;
+      overflow:auto;
+      padding:6px 8px;
+      scroll-behavior:smooth;
+    }
+
+    .w3-sidebar-foot{
+      border-top:1px solid var(--w3-rail-border);
+      padding:6px 8px;
+      flex-shrink:0;
+      background:var(--surface);
+    }
+
+    .w3-nav-section{
+      padding:8px 4px 4px;
+    }
+
+    .w3-section-title{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      color:var(--primary-color);
+      font-size:var(--fs-12);
+      font-weight:700;
+      letter-spacing:.08rem;
+      text-transform:uppercase;
+      padding:0 4px;
+      line-height:1.15;
+    }
+
+    .w3-section-rule{
+      height:8px;
+      display:grid;
+      align-items:center;
+    }
+
+    .w3-section-rule::before{
+      content:"";
+      height:1px;
+      width:100%;
+      background:var(--w3-rule-grad-l);
+    }
+
+    html.theme-dark .w3-section-rule::before{
+      background:var(--w3-rule-grad-d);
+    }
+
+    .w3-menu{
+      display:grid;
+      gap:3px;
+      padding:4px 2px;
+    }
+
+    .w3-group{
+      display:grid;
+      gap:3px;
+      margin-top:1px;
+    }
+
+    .w3-link{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 8px;
+      color:var(--w3-rail-text);
+      border-radius:var(--radius-2);
+      transition:background .16s ease, transform .16s ease, color .16s ease, box-shadow .16s ease;
+      text-decoration:none;
+      font-size:var(--fs-12);
+      line-height:1.2;
+    }
+
+    .w3-link i{
+      min-width:16px;
+      text-align:center;
+      opacity:.95;
+      font-size:.92em;
+    }
+
+    .w3-link:hover{
+      background:var(--w3-rail-hover);
+      transform:translateX(1px);
+      color:var(--ink);
+    }
+
+    .w3-link.active{
+      background:var(--w3-rail-active);
+      color:var(--ink);
+      font-weight:600;
+    }
+
+    .w3-link.active::before{
+      content:"";
+      position:absolute;
+      left:-4px;
+      top:6px;
+      bottom:6px;
+      width:2px;
+      background:var(--accent-color);
+      border-radius:2px;
+    }
+
+    .w3-link.w3-focus-flash{
+      animation:w3FocusFlash 1.05s ease;
+    }
+
+    @keyframes w3FocusFlash{
+      0%   { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+      20%  { box-shadow: 0 0 0 5px rgba(139,46,58,.12); }
+      100% { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+    }
+
+    html.theme-dark .w3-link.w3-focus-flash{
+      animation:w3FocusFlashDark 1.05s ease;
+    }
+
+    @keyframes w3FocusFlashDark{
+      0%   { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+      20%  { box-shadow: 0 0 0 5px rgba(139,46,58,.16); }
+      100% { box-shadow: 0 0 0 0 rgba(139,46,58,0); }
+    }
+
+    .w3-toggle{
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .w3-toggle .w3-chev{
+      margin-left:auto;
+      margin-right:1px;
+      padding-left:4px;
+      opacity:.8;
+      font-size:.8em;
+      transition:transform .18s ease;
+    }
+
+    .w3-toggle.w3-open .w3-chev{
+      transform:rotate(180deg);
+    }
+
+    .w3-submenu{
+      display:none;
+      margin-left:6px;
+      padding-left:6px;
+      border-left:1px dashed var(--w3-rail-border);
+    }
+
+    .w3-submenu .w3-link{
+      padding:7px 8px 7px 28px;
+      margin-bottom:2px;
+      font-size:var(--fs-12);
+    }
+
+    .w3-appbar{
+      position:sticky;
+      top:0;
+      z-index:1030;
+      height:var(--w3-appbar-h);
+      background:var(--surface);
+      border-bottom:1px solid var(--line-strong);
+      display:flex;
+      align-items:center;
+      transition:box-shadow .18s ease, background .18s ease;
+    }
+
+    .w3-appbar.w3-appbar-scrolled{
+      box-shadow:var(--shadow-1);
+    }
+
+    .w3-appbar-inner{
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:0 10px;
+    }
+
+    .w3-app-logo{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      text-decoration:none;
+    }
+
+    .w3-app-logo img{
+      height:18px;
+      width:auto;
+    }
+
+    .w3-app-logo span{
+      font-family:var(--font-head);
+      font-weight:700;
+      color:var(--ink);
+      font-size:var(--fs-13);
+      line-height:1;
+    }
+
+    .w3-title{
+      font-family:var(--font-head);
+      color:var(--ink);
+      font-size:var(--fs-14);
+      line-height:1.1;
+      font-weight:600;
+      margin:0;
+    }
+
+    .w3-icon-btn{
+      width:30px;
+      height:30px;
+      display:inline-grid;
+      place-items:center;
+      border:1px solid var(--line-strong);
+      background:var(--surface);
+      color:var(--secondary-color);
+      border-radius:var(--radius-1);
+      transition:transform .16s ease, background .16s ease, border-color .16s ease;
+      padding:0;
+      box-shadow:none;
+    }
+
+    .w3-icon-btn i{
+      font-size:12px;
+      line-height:1;
+    }
+
+    .w3-icon-btn:hover{
+      background:var(--page-hover);
+      transform:translateY(-1px);
+    }
+
+    .w3-notify-btn{
+      position:relative;
+    }
+
+    .w3-notify-badge{
+      position:absolute;
+      top:-4px;
+      right:-3px;
+      min-width:17px;
+      height:17px;
+      padding:0 4px;
+      border-radius:999px;
+      background:#dc2626;
+      color:#fff;
+      font-size:9px;
+      font-weight:800;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      border:2px solid var(--surface);
+      line-height:1;
+    }
+
+    .w3-notify-badge.show{
+      display:inline-flex;
+    }
+
+    .w3-profile-link{
+      width:34px;
+      height:34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--line-strong);
+      background:var(--surface);
+      border-radius:999px;
+      overflow:hidden;
+      text-decoration:none;
+      transition:transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+      box-shadow:none;
+    }
+
+    .w3-profile-link:hover{
+      background:var(--page-hover);
+      transform:translateY(-1px);
+    }
+
+    .w3-profile-avatar{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .w3-profile-initial{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:800;
+      color:var(--secondary-color);
+      background:rgba(139,46,58,.08);
+      text-transform:uppercase;
+      line-height:1;
+    }
+
+    .w3-hamburger{
+      width:30px;
+      height:30px;
+      border:1px solid var(--line-strong);
+      border-radius:var(--radius-1);
+      background:var(--surface);
+      display:inline-grid;
+      place-items:center;
+      cursor:pointer;
+      padding:0;
+      box-shadow:none;
+    }
+
+    .w3-bars{
+      position:relative;
+      width:14px;
+      height:10px;
+    }
+
+    .w3-bar{
+      position:absolute;
+      left:0;
+      width:100%;
+      height:2px;
+      background:#1f2a44;
+      border-radius:2px;
+      transition:transform .22s ease, opacity .18s ease, top .22s ease;
+    }
+
+    .w3-bar:nth-child(1){top:0}
+    .w3-bar:nth-child(2){top:4px}
+    .w3-bar:nth-child(3){top:8px}
+
+    .w3-hamburger.is-active .w3-bar:nth-child(1){top:4px; transform:rotate(45deg)}
+    .w3-hamburger.is-active .w3-bar:nth-child(2){opacity:0}
+    .w3-hamburger.is-active .w3-bar:nth-child(3){top:4px; transform:rotate(-45deg)}
+
+    .w3-note{
+      border:1px solid var(--line-strong);
+      background:var(--surface-2);
+      border-radius:var(--radius-2);
+      padding:8px 10px;
+    }
+
+    .w3-content{
+      padding:12px;
+      margin-inline:auto;
+      transition:padding .24s ease;
+    }
+
+    .w3-content.w3-disabled-content{
+      pointer-events:none;
+      user-select:none;
+      opacity:.45;
+      filter:grayscale(.08);
+    }
+
+    @media (min-width: 992px){
+      .w3-content{
+        padding-left:calc(12px + var(--w3-rail-w));
+      }
+
+      .w3-app-logo{
+        display:none;
+      }
+    }
+
+    .w3-overlay{
+      position:fixed;
+      top:0;
+      bottom:0;
+      right:0;
+      left:var(--w3-rail-w);
+      background:rgba(0,0,0,.42);
+      z-index:1040;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transition:opacity .18s ease, visibility .18s ease;
+    }
+
+    .w3-overlay.w3-on{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+
+    @media (max-width: 991px){
+      .w3-sidebar{
+        transform:translateX(-100%);
+      }
+
+      .w3-sidebar.w3-on{
+        transform:translateX(0);
+      }
+
+      .w3-content{
+        padding-left:12px;
+      }
+
+      .js-theme-btn{
+        display:none!important;
+      }
+
+      .w3-app-logo{
+        display:flex;
+      }
+
+      .w3-overlay{
+        left:var(--w3-rail-w);
+      }
+    }
+
+    html.theme-dark .w3-sidebar{
+      background:var(--surface);
+      border-right-color:var(--line-strong);
+    }
+
+    html.theme-dark .w3-sidebar-head{
+      border-bottom-color:var(--line-strong);
+    }
+
+    html.theme-dark .w3-link:hover{
+      background:#0c172d;
+    }
+
+    html.theme-dark .w3-link.active{
+      background:rgba(139,46,58,.18);
+    }
+
+    html.theme-dark .w3-overlay{
+      background:rgba(0,0,0,.55);
+    }
+
+    html.theme-dark .w3-appbar{
+      background:var(--surface);
+      border-bottom-color:var(--line-strong);
+    }
+
+    html.theme-dark .w3-icon-btn,
+    html.theme-dark .w3-hamburger,
+    html.theme-dark .w3-profile-link{
+      background:var(--surface);
+      border-color:var(--line-strong);
+      color:var(--text-color);
+    }
+
+    html.theme-dark .w3-icon-btn:hover,
+    html.theme-dark .w3-hamburger:hover,
+    html.theme-dark .w3-profile-link:hover{
+      background:#0c172d;
+    }
+
+    html.theme-dark .w3-bar{
+      background:#e8edf7;
+    }
+
+    html.theme-dark .w3-note{
+      background:#0b1020;
+      border-color:var(--line-strong);
+    }
+
+    html.theme-dark .w3-profile-initial{
+      background:rgba(139,46,58,.18);
+      color:#f7d7dd;
+    }
+
+    .w3-notif-drawer{
+      border-left:1px solid var(--line-strong);
+      background:var(--surface);
+    }
+
+    .w3-notif-drawer .offcanvas-header{
+      border-bottom:1px solid var(--line-strong);
+    }
+
+    .w3-notif-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .w3-notif-empty{
+      text-align:center;
+      padding:24px 16px;
+      border:1px dashed var(--line-strong);
+      border-radius:16px;
+      background:var(--surface-2);
+      color:var(--muted-color);
+      font-size:12px;
+    }
+
+    .w3-notif-item{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      border:1px solid var(--line-strong);
+      border-radius:16px;
+      background:var(--surface);
+      padding:14px;
+      transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    }
+
+    .w3-notif-item:hover{
+      transform:translateY(-1px);
+      box-shadow:0 14px 28px rgba(15,23,42,.08);
+      color:inherit;
+    }
+
+    .w3-notif-item.is-unread{
+      border-color:rgba(53,92,125,.26);
+      background:linear-gradient(180deg, rgba(53,92,125,.04), rgba(255,255,255,.98));
+    }
+
+    .w3-notif-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .w3-notif-title{
+      font-size:13px;
+      font-weight:800;
+      color:var(--ink);
+      line-height:1.35;
+    }
+
+    .w3-notif-time{
+      white-space:nowrap;
+      color:var(--muted-color);
+      font-size:11px;
+    }
+
+    .w3-notif-text{
+      margin-top:6px;
+      color:var(--muted-color);
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .w3-notif-meta{
+      margin-top:8px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+
+    .w3-notif-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line-strong);
+      background:var(--surface-2);
+      color:var(--muted-color);
+      font-size:10px;
+      font-weight:700;
+    }
+
+    .w3-notif-actions{
+      margin-top:10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    html.theme-dark .w3-notif-drawer,
+    html.theme-dark .w3-notif-item,
+    html.theme-dark .w3-notif-pill,
+    html.theme-dark .w3-notif-empty{
+      background:var(--surface);
+      border-color:var(--line-strong);
+    }
+
+    html.theme-dark .w3-notif-item.is-unread{
+      background:linear-gradient(180deg, rgba(59,130,246,.08), rgba(15,23,42,.96));
+    }
+  </style>
+
+  <style>
+    html.theme-dark ::-webkit-scrollbar { width: 8px !important; }
+    html.theme-dark ::-webkit-scrollbar-track { background: #1e293b !important; border-radius: 4px !important; }
+    html.theme-dark ::-webkit-scrollbar-thumb { background: #475569 !important; border-radius: 4px !important; }
+    html.theme-dark ::-webkit-scrollbar-thumb:hover { background: #64748b !important; }
+    html.theme-dark .w3-sidebar-scroll::-webkit-scrollbar { width: 6px !important; }
+    html.theme-dark .w3-sidebar-scroll::-webkit-scrollbar-track { background: #1e293b !important; }
+    html.theme-dark .w3-sidebar-scroll::-webkit-scrollbar-thumb { background: #475569 !important; }
+  </style>
+</head>
+<body>
+
+<aside id="sidebar" class="w3-sidebar" aria-label="Sidebar">
+  <div class="w3-sidebar-head">
+    <a href="/dashboard" class="w3-brand">
+      <img id="logo" src="{{ asset('/assets/media/images/web/logo.png') }}" alt="W3Techiez">
+    </a>
+  </div>
+
+  <div class="w3-sidebar-scroll">
+    <div class="w3-nav-section">
+      <div class="w3-section-title"><i class="fa-solid fa-chart-simple"></i> OVERVIEW</div>
+      <div class="w3-section-rule"></div>
+    </div>
+    <nav class="w3-menu" aria-label="Overview">
+      <a href="/dashboard" class="w3-link"><i class="fa-solid fa-gauge"></i><span>Dashboard</span></a>
+    </nav>
+
+    <div id="studentAcademicMenu" style="display:none">
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-graduation-cap"></i> ACADEMICS</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Student Academics">
+        <a href="/syllabus" class="w3-link" id="studentSyllabusLink">
+          <i class="fa-solid fa-book"></i><span>Syllabus</span>
+        </a>
+        <a href="/lesson-plan" class="w3-link" id="studentLessonPlanLink">
+          <i class="fa-solid fa-calendar-days"></i><span>Lesson Plan</span>
+        </a>
+        <a href="/notices" class="w3-link" id="studentNoticesLink">
+          <i class="fa-solid fa-bullhorn"></i><span>Notices</span>
+        </a>
+        <a href="/study-material" class="w3-link" id="studentStudyMaterialLink">
+          <i class="fa-solid fa-file-arrow-up"></i><span>Study Material</span>
+        </a>
+        <a href="/assignments" class="w3-link" id="studentAssignmentsLink">
+          <i class="fa-solid fa-file-signature"></i><span>Assignments</span>
+        </a>
+        <a href="/quizzes" class="w3-link" id="studentQuizzesLink">
+          <i class="fa-solid fa-clipboard-question"></i><span>Quizzes</span>
+        </a>
+        <a href="/my/result" class="w3-link" id="studentQuizzesLink">
+          <i class="fa-solid fa-square-poll-vertical"></i><span>Result</span>
+        </a>
+      </nav>
+    </div>
+
+    <div id="dynamicMenuWrap" style="display:none"></div>
+
+    <div id="adminFullMenu" style="display:none">
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-graduation-cap"></i> ACADEMICS</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Academics">
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-campus" aria-expanded="false">
+            <i class="fa-solid fa-building-columns"></i><span>Campus</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-campus" class="w3-submenu" role="group" aria-label="Campus submenu">
+            <a href="/campus/manage" class="w3-link">Manage Campus</a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-institution" aria-expanded="false">
+            <i class="fa-solid fa-university"></i><span>Institution</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-institution" class="w3-submenu" role="group" aria-label="Institution submenu">
+            <a href="/institutions/manage" class="w3-link">Manage Institutions</a>
+          </div>
+        </div>
+
+        <a href="/departments" class="w3-link">
+          <i class="fa-solid fa-file-lines"></i><span>Departments</span>
+        </a>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-course" aria-expanded="false">
+            <i class="fa-solid fa-book-open"></i><span>Course</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-course" class="w3-submenu" role="group" aria-label="Course submenu">
+            <a href="/courses/manage" class="w3-link">Manage Courses</a>
+            <a href="/course-type/manage" class="w3-link">Course Type</a>
+            <a href="/affiliation/manage" class="w3-link">Manage Affiliation</a>
+          </div>
+        </div>
+
+        <a href="/syllabus/view" class="w3-link">
+          <i class="fa-solid fa-file-lines"></i><span>Syllabus</span>
+        </a>
+
+        <a href="/course-sections/manage" class="w3-link">
+          <i class="fa-solid fa-people-roof"></i><span>Section</span>
+        </a>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-intake" aria-expanded="false">
+            <i class="fa-solid fa-chalkboard-teacher"></i><span>Intake</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-intake" class="w3-submenu" role="group" aria-label="Intake submenu">
+            <a href="/intake-type/manage" class="w3-link">Manage Intake Type</a>
+            <a href="/reservation-type/manage" class="w3-link">Manage Reservation Type</a>
+            <a href="/intake/manage" class="w3-link">Manage Intake</a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-subject" aria-expanded="false">
+            <i class="fa-solid fa-book"></i><span>Subject</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-subject" class="w3-submenu" role="group" aria-label="Subject submenu">
+            <a href="/subject-type/manage" class="w3-link">Subject Type</a>
+            <a href="/subject/manage" class="w3-link">Manage Subjects</a>
+            <a href="/faculty/subject/assign" class="w3-link">Assign Subjects</a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-routine" aria-expanded="false">
+            <i class="fa-solid fa-calendar-days"></i><span>Routine</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-routine" class="w3-submenu" role="group" aria-label="Routine submenu">
+            <a href="/class-types/manage" class="w3-link">Class Type</a>
+            <a href="/routine" class="w3-link">Manage Routines</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-calculator"></i> ACCOUNTING</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Accounting">
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-accounting" aria-expanded="false">
+            <i class="fa-solid fa-wallet"></i><span>Fees</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-accounting" class="w3-submenu" role="group" aria-label="Fees submenu">
+            <a href="/feestructure/manage" class="w3-link">Fees Structure</a>
+            <a href="/fees" class="w3-link">Manage Fees</a>
+            <a href="/fees/collect/view" class="w3-link">Collect Fees</a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-scholarship" aria-expanded="false">
+            <i class="fa-solid fa-award"></i><span>Scholarship</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-scholarship" class="w3-submenu" role="group" aria-label="Scholarship submenu">
+            <a href="/scholarship-type/manage" class="w3-link">Manage Scholarship Type</a>
+            <a href="/scholarship/manage/view" class="w3-link">Manage Scholarship</a>
+            <a href="/scholarship/assign/view" class="w3-link">Assign Scholarship</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-users"></i> USERS</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Users">
+        <a href="/user/manage" class="w3-link">
+          <i class="fa-solid fa-user-group"></i><span>Users</span>
+        </a>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-student" aria-expanded="false">
+            <i class="fa-solid fa-user-graduate"></i><span>Student</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-student" class="w3-submenu" role="group" aria-label="Student submenu">
+            <a href="/student/all" class="w3-link">All Students</a>
+            <a href="/student/register" class="w3-link">Register</a>
+            <a href="/student/promote" class="w3-link">Promote</a>
+            <a href="/exam/result/view" class="w3-link">Exam Result</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-file-lines"></i> CONTENT</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Content">
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-notice" aria-expanded="false">
+            <i class="fa-solid fa-bullhorn"></i><span>Notice</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-notice" class="w3-submenu" role="group" aria-label="Notice submenu">
+            <a href="/notice/create" class="w3-link">Create Notice</a>
+            <a href="/notice/manage" class="w3-link">Manage Notice</a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-study-material" aria-expanded="false">
+            <i class="fa-solid fa-file-arrow-up"></i><span>Study Material</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-study-material" class="w3-submenu" role="group" aria-label="Study Material submenu">
+            <a href="/study-material/create" class="w3-link">Create Study Material</a>
+            <a href="/study-material/manage" class="w3-link">Manage Study Material</a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-assignments" aria-expanded="false">
+            <i class="fa-solid fa-file-signature"></i><span>Assignments</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-assignments" class="w3-submenu" role="group" aria-label="Assignments submenu">
+            <a href="/assignment/create" class="w3-link">Create Assignments</a>
+            <a href="/assignments/manage" class="w3-link">Manage Assignments</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-file-pen"></i> EXAMS</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Exams">
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-quizz" aria-expanded="false">
+            <i class="fa-solid fa-file-pen"></i><span>Quiz</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-quizz" class="w3-submenu" role="group" aria-label="Quiz submenu">
+            <a href="/quizz/create" class="w3-link">Create Quiz</a>
+            <a href="/quizz/manage" class="w3-link">Manage Quiz</a>
+            <a href="/quizz/questions/manage" class="w3-link">Question Bank</a>
+            <a href="/quizz/results" class="w3-link">All Results</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-screwdriver-wrench"></i> PRIVILEGES</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Privileges">
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-dashboard-menu" aria-expanded="false">
+            <i class="fa-solid fa-puzzle-piece"></i><span>Dashboard Menu</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-dashboard-menu" class="w3-submenu" role="group" aria-label="Dashboard Menu submenu">
+            <a href="/dashboard-menu/create" class="w3-link"><span>Create Dashboard Menu</span></a>
+            <a href="/dashboard-menu/manage" class="w3-link"><span>Manage Dashboard Menu</span></a>
+          </div>
+        </div>
+
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-page-privilege" aria-expanded="false">
+            <i class="fa-solid fa-shield-halved"></i><span>Page Privilege</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-page-privilege" class="w3-submenu" role="group" aria-label="Page Privilege submenu">
+            <a href="/page-privilege/create" class="w3-link"><span>Create Page Privilege</span></a>
+            <a href="/page-privilege/manage" class="w3-link"><span>Manage Page Privilege</span></a>
+            <a href="/role-privileges/manage" class="w3-link"><span>Assign Role Privilege</span></a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-gear"></i> OPERATIONS</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Operations">
+        <a href="/activity-logs" class="w3-link">
+          <i class="fa-solid fa-clock-rotate-left"></i><span>Activity Logs</span>
+        </a>
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-settings" aria-expanded="false">
+            <i class="fa-solid fa-gear"></i><span>Settings</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-settings" class="w3-submenu" role="group" aria-label="Settings submenu">
+            <a href="/mailers/manage" class="w3-link"><span>Mailer</span></a>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+
+    <div class="w3-nav-section d-lg-none">
+      <div class="w3-section-title"><i class="fa-solid fa-user"></i> ACCOUNT</div>
+      <div class="w3-section-rule"></div>
+    </div>
+    <nav class="w3-menu d-lg-none" aria-label="Account">
+      <a href="/profile" class="w3-link"><i class="fa fa-id-badge"></i><span>Profile</span></a>
+      <a href="/settings" class="w3-link"><i class="fa fa-gear"></i><span>Settings</span></a>
+    </nav>
+  </div>
+
+  <div class="w3-sidebar-foot">
+    <a href="#" id="logoutBtnSidebar" class="w3-link" style="padding:7px 8px">
+      <i class="fa fa-right-from-bracket"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<header class="w3-appbar" id="w3Appbar">
+  <div class="w3-appbar-inner">
+    <button id="btnHamburger" class="w3-hamburger d-lg-none" aria-label="Open menu" aria-expanded="false" title="Menu">
+      <span class="w3-bars" aria-hidden="true">
+        <span class="w3-bar"></span><span class="w3-bar"></span><span class="w3-bar"></span>
+      </span>
+    </button>
+
+    <a href="/dashboard" class="w3-app-logo d-lg-none">
+      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="MSIT Home Builder">
+      <span>MSIT Builder</span>
+    </a>
+
+    <strong class="w3-title ms-1 d-none d-lg-inline">
+      @yield('title','MSIT Home Builder')
+    </strong>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button id="btnFullscreen" class="w3-icon-btn d-none d-lg-inline-grid" aria-label="Toggle fullscreen" title="Fullscreen">
+        <i class="fa-solid fa-expand" id="fullscreenIcon"></i>
+      </button>
+
+      <button id="btnTheme" class="w3-icon-btn js-theme-btn d-none d-lg-inline-grid" aria-label="Toggle theme" title="Toggle theme">
+        <i class="fa-regular fa-moon" id="themeIcon"></i>
+      </button>
+
+      <button
+        type="button"
+        class="w3-icon-btn w3-notify-btn"
+        id="alertsMenu"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#notificationDrawer"
+        aria-controls="notificationDrawer"
+        aria-label="Notifications"
+        title="Notifications">
+        <i class="fa-regular fa-bell"></i>
+        <span class="w3-notify-badge" id="notificationBadge">0</span>
+      </button>
+
+      <a href="/profile" class="w3-profile-link d-none d-lg-inline-flex" id="profileCircleLink" aria-label="Profile" title="Profile">
+        <img id="profileCircleImage" class="w3-profile-avatar" alt="Profile" style="display:none;">
+        <span id="profileCircleLetter" class="w3-profile-initial">
+          <i class="fa-regular fa-user"></i>
+        </span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="offcanvas offcanvas-end w3-notif-drawer" tabindex="-1" id="notificationDrawer" aria-labelledby="notificationDrawerLabel">
+  <div class="offcanvas-header">
+    <div>
+      <h5 class="offcanvas-title" id="notificationDrawerLabel">Notifications</h5>
+      <div class="small text-muted">Updates routed to your account</div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+      <a href="/notifications" class="btn btn-light btn-sm">
+        <i class="fa fa-list me-1"></i>View All
+      </a>
+      <button type="button" class="btn btn-primary" id="drawerReadAllBtn">
+        <i class="fa fa-check-double me-1"></i>Read All
+      </button>
+    </div>
+
+    <div class="w3-notif-list" id="notificationDrawerList">
+      <div class="w3-notif-empty">
+        <i class="fa fa-spinner fa-spin me-2"></i>Loading notifications...
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sidebarOverlay" class="w3-overlay" aria-hidden="true"></div>
+
+<main class="w3-content mx-auto" id="mainContentWrap">
+  <section class="panel mx-auto">@yield('content')</section>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@stack('scripts')
+@yield('scripts')
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const html = document.documentElement;
+  const $doc = $(document);
+  const $win = $(window);
+
+  const wrap = document.getElementById('pageLoadingWrap');
+  const hideLoading = () => {
+    if (wrap) {
+      $('#pageLoadingWrap').stop(true, true).fadeOut(180, function () {
+        this.style.display = 'none';
+      });
+    }
+  };
+
+  const SIDEBAR_CACHE_PREFIX = 'w3_sidebar_cache_v1:';
+  const SIDEBAR_CACHE_TTL_MS = 1000;
+  const PROFILE_CACHE_PREFIX = 'w3_profile_cache_v1:';
+  const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000;
+  const NOTIFICATION_CACHE_PREFIX = 'w3_notification_cache_v1:';
+  const NOTIFICATION_CACHE_TTL_MS = 60 * 1000;
+
+  function getScopedCacheKey(prefix, token) {
+    return prefix + (token ? token.slice(-24) : 'guest');
+  }
+
+  function getSidebarCacheKey(token) {
+    return getScopedCacheKey(SIDEBAR_CACHE_PREFIX, token);
+  }
+
+  function readSidebarCache(token) {
+    try {
+      const raw = sessionStorage.getItem(getSidebarCacheKey(token));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeSidebarCache(token, data) {
+    try {
+      sessionStorage.setItem(getSidebarCacheKey(token), JSON.stringify({
+        saved_at: Date.now(),
+        payload: data
+      }));
+    } catch (e) {}
+  }
+
+  function getSidebarPayload(cacheEntry) {
+    if (!cacheEntry) return null;
+    if (Object.prototype.hasOwnProperty.call(cacheEntry, 'payload')) {
+      return cacheEntry.payload;
+    }
+    return cacheEntry;
+  }
+
+  function getSidebarCacheAge(cacheEntry) {
+    if (!cacheEntry || typeof cacheEntry.saved_at !== 'number') return Number.POSITIVE_INFINITY;
+    return Math.max(0, Date.now() - cacheEntry.saved_at);
+  }
+
+  function readScopedCache(prefix, token) {
+    try {
+      const raw = sessionStorage.getItem(getScopedCacheKey(prefix, token));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeScopedCache(prefix, token, data) {
+    try {
+      sessionStorage.setItem(getScopedCacheKey(prefix, token), JSON.stringify({
+        saved_at: Date.now(),
+        payload: data
+      }));
+    } catch (e) {}
+  }
+
+  function getCachePayload(cacheEntry) {
+    if (!cacheEntry) return null;
+    return Object.prototype.hasOwnProperty.call(cacheEntry, 'payload') ? cacheEntry.payload : cacheEntry;
+  }
+
+  function getCacheAge(cacheEntry) {
+    if (!cacheEntry || typeof cacheEntry.saved_at !== 'number') return Number.POSITIVE_INFINITY;
+    return Math.max(0, Date.now() - cacheEntry.saved_at);
+  }
+
+  function renderSidebarFromPayload(data) {
+    if (data === 'all' || data?.tree === 'all') {
+      if (adminFullMenu) adminFullMenu.style.display = '';
+      if (dynamicMenuWrap) dynamicMenuWrap.style.display = 'none';
+      if (adminFullMenu) {
+        bindSubmenuToggles(adminFullMenu);
+        restoreOpenMenus(adminFullMenu);
+      }
+      return true;
+    }
+
+    const tree = Array.isArray(data?.tree) ? data.tree : [];
+    if (tree.length) {
+      if (adminFullMenu) adminFullMenu.style.display = 'none';
+      renderDynamicGroupedTree(tree);
+    } else {
+      if (adminFullMenu) adminFullMenu.style.display = 'none';
+      if (dynamicMenuWrap) {
+        dynamicMenuWrap.innerHTML = '';
+        dynamicMenuWrap.style.display = 'none';
+      }
+    }
+
+    return true;
+  }
+
+  const THEME_KEY = 'theme';
+  const btnTheme = document.getElementById('btnTheme');
+  const themeIcon = document.getElementById('themeIcon');
+
+  function setTheme(mode){
+    const isDark = mode === 'dark';
+    html.classList.toggle('theme-dark', isDark);
+    localStorage.setItem(THEME_KEY, mode);
+    if (themeIcon) themeIcon.className = isDark ? 'fa-regular fa-sun' : 'fa-regular fa-moon';
+  }
+
+  setTheme(
+    localStorage.getItem(THEME_KEY) ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  );
+
+  btnTheme?.addEventListener('click', () =>
+    setTheme(html.classList.contains('theme-dark') ? 'light' : 'dark')
+  );
+
+  const btnFullscreen = document.getElementById('btnFullscreen');
+  const fullscreenIcon = document.getElementById('fullscreenIcon');
+
+  function syncFullscreenIcon(){
+    const isFs = !!document.fullscreenElement;
+    if (fullscreenIcon) {
+      fullscreenIcon.className = isFs ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+    }
+    if (btnFullscreen) {
+      btnFullscreen.setAttribute('title', isFs ? 'Exit Fullscreen' : 'Fullscreen');
+      btnFullscreen.setAttribute('aria-label', isFs ? 'Exit fullscreen' : 'Enter fullscreen');
+    }
+  }
+
+  btnFullscreen?.addEventListener('click', async () => {
+    try{
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    }catch(e){}
+  });
+
+  document.addEventListener('fullscreenchange', syncFullscreenIcon);
+  syncFullscreenIcon();
+
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const btnHamburger = document.getElementById('btnHamburger');
+
+  const openSidebar = () => {
+    sidebar.classList.add('w3-on');
+    overlay.classList.add('w3-on');
+    btnHamburger?.classList.add('is-active');
+    btnHamburger?.setAttribute('aria-expanded','true');
+    btnHamburger?.setAttribute('aria-label','Close menu');
+    $('body').css('overflow', 'hidden');
+  };
+
+  const closeSidebar = () => {
+    sidebar.classList.remove('w3-on');
+    overlay.classList.remove('w3-on');
+    btnHamburger?.classList.remove('is-active');
+    btnHamburger?.setAttribute('aria-expanded','false');
+    btnHamburger?.setAttribute('aria-label','Open menu');
+    $('body').css('overflow', '');
+  };
+
+  btnHamburger?.addEventListener('click', () =>
+    sidebar.classList.contains('w3-on') ? closeSidebar() : openSidebar()
+  );
+
+  overlay?.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  function syncAppbarShadow(){
+    $('#w3Appbar').toggleClass('w3-appbar-scrolled', $win.scrollTop() > 4);
+  }
+  $win.on('scroll', syncAppbarShadow);
+  syncAppbarShadow();
+
+  const profileCircleImage = document.getElementById('profileCircleImage');
+  const profileCircleLetter = document.getElementById('profileCircleLetter');
+
+  function setHeaderProfile(imageUrl, letter){
+    const img = (imageUrl || '').trim();
+    const fallback = (letter || '').trim().charAt(0).toUpperCase();
+
+    if (img) {
+      profileCircleImage.src = img;
+      profileCircleImage.style.display = 'block';
+      profileCircleLetter.style.display = 'none';
+      profileCircleImage.onerror = function () {
+        profileCircleImage.style.display = 'none';
+        profileCircleLetter.style.display = 'flex';
+        profileCircleLetter.innerHTML = fallback || '<i class="fa-regular fa-user"></i>';
+        profileCircleImage.onerror = null;
+      };
+      return;
+    }
+
+    profileCircleImage.removeAttribute('src');
+    profileCircleImage.style.display = 'none';
+    profileCircleLetter.style.display = 'flex';
+    profileCircleLetter.innerHTML = fallback || '<i class="fa-regular fa-user"></i>';
+  }
+
+  function renderProfileMiniFromPayload(payload){
+    const block = payload?.data || payload || {};
+    setHeaderProfile(block.image || '', block.avatar_text || '');
+  }
+
+  const roleFromStorage = sessionStorage.getItem('role') || localStorage.getItem('role');
+
+  (function(){
+    const role = (roleFromStorage || '').toLowerCase();
+    if (role === 'director' || role === 'principal') {
+      const block = document.getElementById('siteSettingsContentBlock');
+      if (block) block.style.display = 'none';
+    }
+  })();
+
+  (function(){
+    const role = (roleFromStorage || '').toLowerCase();
+    const studentAcademicMenu = document.getElementById('studentAcademicMenu');
+    if (role === 'student' && studentAcademicMenu) {
+      studentAcademicMenu.style.display = '';
+    }
+  })();
+
+  const API_SIDEBAR = '/api/my/sidebar-menus';
+  const API_LOGOUT = '/api/auth/logout';
+  const API_PROFILE_MINI = '/api/profile/mini';
+  const API_NOTIFICATION_COUNT = '/api/notifications/unread-count';
+  const API_NOTIFICATION_DRAWER = '/api/notifications/drawer';
+  const API_NOTIFICATION_READ_ALL = '/api/notifications/read-all';
+  const LOGIN_PAGE = '/';
+  const OPEN_MENU_KEY = 'msit_open_sidebar_menus';
+
+  const adminFullMenu   = document.getElementById('adminFullMenu');
+  const dynamicMenuWrap = document.getElementById('dynamicMenuWrap');
+  const mainContentWrap = document.getElementById('mainContentWrap');
+  const notificationBadge = document.getElementById('notificationBadge');
+  const notificationDrawer = document.getElementById('notificationDrawer');
+  const notificationDrawerList = document.getElementById('notificationDrawerList');
+  const drawerReadAllBtn = document.getElementById('drawerReadAllBtn');
+
+  let sessionExpiredShown = false;
+
+  function getBearerToken(){
+    return sessionStorage.getItem('token') || localStorage.getItem('token') || null;
+  }
+
+  function clearAuthStorage(){
+    try { sessionStorage.removeItem('token'); } catch(e){}
+    try { sessionStorage.removeItem('role'); } catch(e){}
+    try { localStorage.removeItem('token'); } catch(e){}
+    try { localStorage.removeItem('role'); } catch(e){}
+  }
+
+  function disableContentSection(){
+    if (mainContentWrap) mainContentWrap.classList.add('w3-disabled-content');
+  }
+
+  function notificationHeaders(extra = {}){
+    const token = getBearerToken();
+    return Object.assign({
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }, extra);
+  }
+
+  function escapeHtml(value){
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatNotificationTime(value){
+    if (!value) return 'Just now';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString([], {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function setNotificationBadge(count){
+    const safeCount = Math.max(0, Number(count || 0));
+    if (!notificationBadge) return;
+    notificationBadge.textContent = safeCount > 99 ? '99+' : safeCount;
+    notificationBadge.classList.toggle('show', safeCount > 0);
+  }
+
+  function setButtonLoadingState(button, loading, loadingLabel){
+    if (!button) return;
+    if (loading) {
+      button.classList.add('btn-loading');
+      button.disabled = true;
+      if (loadingLabel) button.setAttribute('aria-label', loadingLabel);
+      return;
+    }
+
+    button.classList.remove('btn-loading');
+    button.disabled = false;
+  }
+
+  async function markNotificationRead(id){
+    try{
+      await fetch(`/api/notifications/${id}/read`, {
+        method: 'POST',
+        headers: notificationHeaders()
+      });
+    }catch(e){}
+
+    await loadHeaderNotifications({ forceRefresh: true });
+  }
+
+  function bindNotificationDrawerActions(){
+    notificationDrawerList?.querySelectorAll('.js-drawer-read-notification').forEach(btn => {
+      btn.addEventListener('click', function () {
+        markNotificationRead(this.dataset.id);
+      });
+    });
+  }
+
+  function renderNotificationDrawer(items){
+    if (!notificationDrawerList) return;
+
+    if (!Array.isArray(items) || !items.length) {
+      notificationDrawerList.innerHTML = `
+        <div class="w3-notif-empty">
+          <i class="fa fa-bell-slash me-2"></i>No notifications available.
+        </div>
+      `;
+      return;
+    }
+
+    notificationDrawerList.innerHTML = items.map(item => `
+      <div class="w3-notif-item ${item.is_read ? '' : 'is-unread'}">
+        <div class="w3-notif-row">
+          <div class="w3-notif-title">${escapeHtml(item.title || 'Notification')}</div>
+          <div class="w3-notif-time">${escapeHtml(formatNotificationTime(item.created_at))}</div>
+        </div>
+        <div class="w3-notif-text">${escapeHtml(item.message || '')}</div>
+        <div class="w3-notif-meta">
+          <span class="w3-notif-pill"><i class="fa fa-tag"></i>${escapeHtml(item.type || 'general')}</span>
+          <span class="w3-notif-pill"><i class="fa ${item.is_read ? 'fa-circle-check' : 'fa-circle'}"></i>${item.is_read ? 'Read' : 'Unread'}</span>
+        </div>
+        <div class="w3-notif-actions">
+          ${!item.is_read ? `
+            <button type="button" class="btn btn-light btn-sm js-drawer-read-notification" data-id="${item.id}">
+              <i class="fa fa-check me-1"></i>Read
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    bindNotificationDrawerActions();
+  }
+
+  function renderNotificationSnapshot(snapshot){
+    if (!snapshot) return;
+    setNotificationBadge(snapshot.unread_count || 0);
+    renderNotificationDrawer(Array.isArray(snapshot.items) ? snapshot.items : []);
+  }
+
+  async function loadHeaderNotifications(options = {}){
+    const token = getBearerToken();
+    if (!token) return;
+
+    const forceRefresh = !!options.forceRefresh;
+    const skipCachedRender = !!options.skipCachedRender;
+    const cached = readScopedCache(NOTIFICATION_CACHE_PREFIX, token);
+    const cachedPayload = getCachePayload(cached);
+
+    if (cachedPayload && !skipCachedRender) {
+      renderNotificationSnapshot(cachedPayload);
+    }
+
+    if (cachedPayload && !forceRefresh && getCacheAge(cached) <= NOTIFICATION_CACHE_TTL_MS) {
+      return;
+    }
+
+    try{
+      const [countRes, drawerRes] = await Promise.all([
+        fetch(API_NOTIFICATION_COUNT, { headers: notificationHeaders() }),
+        fetch(`${API_NOTIFICATION_DRAWER}?limit=10`, { headers: notificationHeaders() })
+      ]);
+
+      const countJson = await countRes.json().catch(() => ({}));
+      const drawerJson = await drawerRes.json().catch(() => ({}));
+
+      if (countRes.ok && countJson?.success && drawerRes.ok && drawerJson?.success) {
+        const snapshot = {
+          unread_count: countJson.data?.unread_count || 0,
+          items: drawerJson.data?.items || []
+        };
+        writeScopedCache(NOTIFICATION_CACHE_PREFIX, token, snapshot);
+        renderNotificationSnapshot(snapshot);
+      }
+    }catch(e){
+      if (!cachedPayload) {
+        setNotificationBadge(0);
+        renderNotificationDrawer([]);
+      }
+    }
+  }
+
+  window.loadHeaderNotifications = loadHeaderNotifications;
+
+  drawerReadAllBtn?.addEventListener('click', async function () {
+    setButtonLoadingState(drawerReadAllBtn, true, 'Reading all notifications');
+    try{
+      const response = await fetch(API_NOTIFICATION_READ_ALL, {
+        method: 'POST',
+        headers: notificationHeaders()
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.message || 'Unable to mark all notifications as read.');
+      }
+
+      await loadHeaderNotifications({ forceRefresh: true });
+    }catch(e){
+      if (window.Swal) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: e.message || 'Unable to mark all notifications as read.'
+        });
+      }
+    } finally {
+      setButtonLoadingState(drawerReadAllBtn, false);
+    }
+  });
+
+  notificationDrawer?.addEventListener('show.bs.offcanvas', () => {
+    loadHeaderNotifications();
+  });
+
+  async function showSessionExpiredPopup(message = 'Your session has expired. Please login again.'){
+    if (sessionExpiredShown) return;
+    sessionExpiredShown = true;
+
+    hideLoading();
+
+    disableContentSection();
+    closeSidebar();
+    clearAuthStorage();
+
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Session expired',
+      text: message,
+      confirmButtonText: 'Login again',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      confirmButtonColor: '#9E363A'
+    });
+
+    window.location.replace(LOGIN_PAGE);
+  }
+
+  async function loadMiniProfile(options = {}){
+    const token = getBearerToken();
+    if (!token) {
+      setHeaderProfile('', '');
+      return;
+    }
+
+    const forceRefresh = !!options.forceRefresh;
+    const skipCachedRender = !!options.skipCachedRender;
+    const cached = readScopedCache(PROFILE_CACHE_PREFIX, token);
+    const cachedPayload = getCachePayload(cached);
+
+    if (cachedPayload && !skipCachedRender) {
+      renderProfileMiniFromPayload(cachedPayload);
+    }
+
+    if (cachedPayload && !forceRefresh && getCacheAge(cached) <= PROFILE_CACHE_TTL_MS) {
+      return;
+    }
+
+    try{
+      const res = await fetch(API_PROFILE_MINI, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        setHeaderProfile('', '');
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+      writeScopedCache(PROFILE_CACHE_PREFIX, token, data);
+      renderProfileMiniFromPayload(data);
+    }catch(e){
+      if (!cachedPayload) {
+        setHeaderProfile('', '');
+      }
+    }
+  }
+
+  function getOpenMenuIds(){
+    try {
+      return JSON.parse(localStorage.getItem(OPEN_MENU_KEY) || '[]');
+    } catch(e){
+      return [];
+    }
+  }
+
+  function saveOpenMenuIds(ids){
+    localStorage.setItem(OPEN_MENU_KEY, JSON.stringify(ids));
+  }
+
+  function syncOpenMenuStorage(){
+    const openIds = [];
+    $('.w3-toggle.w3-open').each(function(){
+      const id = $(this).data('target');
+      if (id) openIds.push(id);
+    });
+    saveOpenMenuIds(openIds);
+  }
+
+  function openSubmenu($toggle, instant = false){
+    const id = $toggle.data('target');
+    const $submenu = $('#' + id);
+
+    if (!$submenu.length) return;
+
+    $toggle.addClass('w3-open').attr('aria-expanded', 'true');
+    $submenu.addClass('w3-open');
+
+    if (instant) {
+      $submenu.show();
+    } else {
+      $submenu.stop(true, true).slideDown(170);
+    }
+  }
+
+  function closeSubmenu($toggle, instant = false){
+    const id = $toggle.data('target');
+    const $submenu = $('#' + id);
+
+    if (!$submenu.length) return;
+
+    $toggle.removeClass('w3-open').attr('aria-expanded', 'false');
+    $submenu.removeClass('w3-open');
+
+    if (instant) {
+      $submenu.hide();
+    } else {
+      $submenu.stop(true, true).slideUp(170);
+    }
+  }
+
+  function restoreOpenMenus(root = document){
+    const openIds = getOpenMenuIds();
+    openIds.forEach((id) => {
+      const $toggle = $(root).find(`.w3-toggle[data-target="${id}"]`).first();
+      if ($toggle.length) openSubmenu($toggle, true);
+    });
+  }
+
+  function bindSubmenuToggles(root = document){
+    $(root).find('.w3-toggle').each(function(){
+      const $tg = $(this);
+      if ($tg.data('bound')) return;
+      $tg.data('bound', true);
+
+      $tg.on('click', function(e){
+        e.preventDefault();
+
+        if ($tg.hasClass('w3-open')) {
+          closeSubmenu($tg);
+        } else {
+          openSubmenu($tg);
+        }
+
+        syncOpenMenuStorage();
+      });
+    });
+  }
+
+  function markActiveLinks(){
+    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    let firstVisibleActive = null;
+
+    document.querySelectorAll('.w3-menu a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href === '#') return;
+
+      const normalizedHref = href.replace(/\/+$/, '') || '/';
+      if (normalizedHref === path){
+        a.classList.add('active');
+
+        const sub = a.closest('.w3-submenu');
+        if (sub){
+          const $sub = $(sub);
+          const $toggle = $sub.prev('.w3-toggle');
+          if ($toggle.length) {
+            openSubmenu($toggle, true);
+          }
+        }
+
+        const isVisible = a.offsetParent !== null && getComputedStyle(a).visibility !== 'hidden';
+        if (!firstVisibleActive && isVisible) firstVisibleActive = a;
+      }
+    });
+
+    syncOpenMenuStorage();
+    return firstVisibleActive;
+  }
+
+  function focusActiveNavIntoView(activeEl){
+    if (!activeEl) return;
+
+    const scroller = document.querySelector('.w3-sidebar-scroll');
+    if (!scroller) return;
+
+    setTimeout(() => {
+      try{
+        const sRect = scroller.getBoundingClientRect();
+        const aRect = activeEl.getBoundingClientRect();
+        const fullyVisible = aRect.top >= sRect.top + 8 && aRect.bottom <= sRect.bottom - 8;
+
+        if (!fullyVisible) {
+          const currentTop = scroller.scrollTop;
+          const deltaTop = aRect.top - sRect.top;
+          const targetTop = currentTop + deltaTop - (sRect.height / 2) + (aRect.height / 2);
+
+          $(scroller).stop(true).animate(
+            { scrollTop: Math.max(0, targetTop - 8) },
+            260
+          );
+        }
+
+        $(activeEl).addClass('w3-focus-flash');
+        setTimeout(() => $(activeEl).removeClass('w3-focus-flash'), 1200);
+      }catch(e){}
+    }, 180);
+  }
+
+  function safeText(v){ return (v ?? '').toString(); }
+
+  function iconHtml(iconClass, fallback='fa-solid fa-circle'){
+    const cls = safeText(iconClass).trim();
+    return `<i class="${cls || fallback}"></i>`;
+  }
+
+  function normalizePath(href){
+    const raw = safeText(href).trim();
+    if (!raw) return '';
+    try{
+      const u = new URL(raw, window.location.origin);
+      return (u.pathname || '/').replace(/\/+$/, '') || '/';
+    }catch(e){
+      return ('/' + raw.replace(/^\/+/, '')).replace(/\/+$/, '') || '/';
+    }
+  }
+
+  const DEFAULT_ROUTE_META = {
+    '/campus/manage':                { section:'ACADEMICS', header:'Campus',          page:'Manage Campus',              icon:'fa-solid fa-building-columns', direct:false },
+    '/institutions/manage':          { section:'ACADEMICS', header:'Institution',     page:'Manage Institutions',        icon:'fa-solid fa-university',       direct:false },
+    '/departments':                  { section:'ACADEMICS', header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-university',       direct:false },
+    '/courses/manage':               { section:'ACADEMICS', header:'Course',          page:'Manage Courses',             icon:'fa-solid fa-book-open',        direct:false },
+    '/course-type/manage':           { section:'ACADEMICS', header:'Course',          page:'Course Type',                icon:'fa-solid fa-book-open',        direct:false },
+    '/affiliation/manage':           { section:'ACADEMICS', header:'Course',          page:'Manage Affiliation',         icon:'fa-solid fa-book-open',        direct:false },
+    '/syllabus/view':                { section:'ACADEMICS', header:'Course',          page:'Syllabus',                   icon:'fa-solid fa-book-open',        direct:false },
+    '/my/syllabus/view':             { section:'ACADEMICS', header:'Academics',       page:'My Syllabus',                icon:'fa-solid fa-book',             direct:true  },
+    '/my/study-material':            { section:'ACADEMICS', header:'Academics',       page:'Study Material',             icon:'fa-solid fa-file-arrow-up',    direct:true  },
+    '/course-sections/manage':       { section:'ACADEMICS', header:'Section',         page:'Section',                    icon:'fa-solid fa-people-roof',      direct:true  },
+    '/intake-type/manage':           { section:'ACADEMICS', header:'Intake',          page:'Manage Intake Type',         icon:'fa-solid fa-chalkboard-teacher', direct:false },
+    '/reservation-type/manage':      { section:'ACADEMICS', header:'Intake',          page:'Manage Reservation Type',    icon:'fa-solid fa-chalkboard-teacher', direct:false },
+    '/intake/manage':                { section:'ACADEMICS', header:'Intake',          page:'Manage Intake',              icon:'fa-solid fa-chalkboard-teacher', direct:false },
+    '/subject-type/manage':          { section:'ACADEMICS', header:'Subject',         page:'Subject Type',               icon:'fa-solid fa-book',             direct:false },
+    '/subject/manage':               { section:'ACADEMICS', header:'Subject',         page:'Manage Subjects',            icon:'fa-solid fa-book',             direct:false },
+    '/faculty/subject/assign':       { section:'ACADEMICS', header:'Subject',         page:'Assign Subjects',            icon:'fa-solid fa-book',             direct:false },
+    '/class-types/manage':           { section:'ACADEMICS', header:'Routine',         page:'Class Type',                 icon:'fa-solid fa-calendar-days',    direct:false },
+    '/routine':                      { section:'ACADEMICS', header:'Routine',         page:'Manage Routines',            icon:'fa-solid fa-calendar-days',    direct:false },
+
+    '/feestructure/manage':          { section:'ACCOUNTING', header:'Fees',           page:'Fees Structure',             icon:'fa-solid fa-wallet',           direct:false },
+    '/fees':                         { section:'ACCOUNTING', header:'Fees',           page:'Manage Fees',                icon:'fa-solid fa-wallet',           direct:false },
+    '/fees/collect/view':            { section:'ACCOUNTING', header:'Fees',           page:'Collect Fees',               icon:'fa-solid fa-wallet',           direct:false },
+    '/scholarship-type/manage':      { section:'ACCOUNTING', header:'Scholarship',    page:'Manage Scholarship Type',    icon:'fa-solid fa-award',            direct:false },
+    '/scholarship/manage/view':      { section:'ACCOUNTING', header:'Scholarship',    page:'Manage Scholarship',         icon:'fa-solid fa-award',            direct:false },
+    '/scholarship/assign/view':      { section:'ACCOUNTING', header:'Scholarship',    page:'Assign Scholarship',         icon:'fa-solid fa-award',            direct:false },
+
+    '/user/manage':                  { section:'USERS',      header:'Users',          page:'Users',                      icon:'fa-solid fa-user-group',       direct:true  },
+    '/student/all':                  { section:'USERS',      header:'Student',        page:'All Students',               icon:'fa-solid fa-users',            direct:false },
+    '/student/register':             { section:'USERS',      header:'Student',        page:'Register',                   icon:'fa-solid fa-user-graduate',    direct:false },
+    '/student/promote':              { section:'USERS',      header:'Student',        page:'Promote',                    icon:'fa-solid fa-arrow-up-right-dots', direct:false },
+    '/exam/result/view':             { section:'USERS',      header:'Student',        page:'Exam Result',                icon:'fa-solid fa-square-poll-vertical', direct:false },
+
+    '/notice/create':                { section:'CONTENT',    header:'Notice',         page:'Create Notice',              icon:'fa-solid fa-bullhorn',         direct:false },
+    '/notice/manage':                { section:'CONTENT',    header:'Notice',         page:'Manage Notice',              icon:'fa-solid fa-bullhorn',         direct:false },
+    '/study-material/create':        { section:'CONTENT',    header:'Study Material', page:'Create Study Material',      icon:'fa-solid fa-file-arrow-up',    direct:false },
+    '/study-material/manage':        { section:'CONTENT',    header:'Study Material', page:'Manage Study Material',      icon:'fa-solid fa-file-arrow-up',    direct:false },
+    '/assignment/create':            { section:'CONTENT',    header:'Assignments',    page:'Create Assignments',         icon:'fa-solid fa-file-signature',   direct:false },
+    '/assignments/manage':           { section:'CONTENT',    header:'Assignments',    page:'Manage Assignments',         icon:'fa-solid fa-file-signature',   direct:false },
+
+    '/quizz/create':                 { section:'EXAMS',      header:'Quiz',           page:'Create Quiz',                icon:'fa-solid fa-file-pen',         direct:false },
+    '/quizz/manage':                 { section:'EXAMS',      header:'Quiz',           page:'Manage Quiz',                icon:'fa-solid fa-file-pen',         direct:false },
+    '/quizz/questions/manage':       { section:'EXAMS',      header:'Quiz',           page:'Question Bank',              icon:'fa-solid fa-list-check',       direct:false },
+    '/quizz/results':                { section:'EXAMS',      header:'Quiz',           page:'All Results',                icon:'fa-solid fa-square-poll-vertical', direct:false },
+
+    '/dashboard-menu/create':        { section:'PRIVILEGES', header:'Dashboard Menu', page:'Create Dashboard Menu',      icon:'fa-solid fa-puzzle-piece',     direct:false },
+    '/dashboard-menu/manage':        { section:'PRIVILEGES', header:'Dashboard Menu', page:'Manage Dashboard Menu',      icon:'fa-solid fa-puzzle-piece',     direct:false },
+    '/page-privilege/create':        { section:'PRIVILEGES', header:'Page Privilege', page:'Create Page Privilege',      icon:'fa-solid fa-shield-halved',    direct:false },
+    '/page-privilege/manage':        { section:'PRIVILEGES', header:'Page Privilege', page:'Manage Page Privilege',      icon:'fa-solid fa-shield-halved',    direct:false },
+    '/role-privileges/manage':       { section:'PRIVILEGES', header:'Page Privilege', page:'Assign Role Privilege',      icon:'fa-solid fa-shield-halved',    direct:false },
+
+    '/activity-logs':                { section:'OPERATIONS', header:'Operations',     page:'Activity Logs',              icon:'fa-solid fa-clock-rotate-left', direct:true  },
+    '/mailers/manage':               { section:'OPERATIONS', header:'Settings',       page:'Mailer',                     icon:'fa-solid fa-gear',             direct:false },
+  };
+
+  const SECTION_ICONS = {
+    'ACADEMICS':  'fa-solid fa-graduation-cap',
+    'ACCOUNTING': 'fa-solid fa-calculator',
+    'USERS':      'fa-solid fa-users',
+    'CONTENT':    'fa-solid fa-file-lines',
+    'EXAMS':      'fa-solid fa-shield-halved',
+    'PRIVILEGES': 'fa-solid fa-screwdriver-wrench',
+    'OPERATIONS': 'fa-solid fa-gear',
+    'OTHER':      'fa-solid fa-folder'
+  };
+
+  const SECTION_ORDER = ['ACADEMICS','ACCOUNTING','USERS','CONTENT','EXAMS','PRIVILEGES','OPERATIONS','OTHER'];
+
+  function inferSectionFromName(name){
+    const n = safeText(name).toLowerCase();
+    if (!n) return 'OTHER';
+    if (/(campus|institution|course|section|intake|subject|routine|faculty|affiliation|syllabus|study material|academic)/.test(n)) return 'ACADEMICS';
+    if (/(account|fees|scholarship|finance)/.test(n)) return 'ACCOUNTING';
+    if (/(user|student|people|faculty|staff)/.test(n)) return 'USERS';
+    if (/(notice|content|page|banner|media|gallery|assignment)/.test(n)) return 'CONTENT';
+    if (/(quiz|exam|result|test)/.test(n)) return 'EXAMS';
+    if (/(privilege|dashboard menu|role privilege)/.test(n)) return 'PRIVILEGES';
+    if (/(setting|mailer|operation|config)/.test(n)) return 'OPERATIONS';
+    return 'OTHER';
+  }
+
+  function getMatchedMeta(page, header){
+    const path = normalizePath(page?.href || '');
+    const matched = DEFAULT_ROUTE_META[path] || null;
+
+    if (matched) {
+      return {
+        section: matched.section,
+        headerName: matched.header,
+        pageName: matched.page,
+        icon: safeText(page?.icon_class || header?.icon_class || matched.icon || ''),
+        direct: !!matched.direct,
+        href: path || safeText(page?.href || ''),
+      };
+    }
+
+    if (/^\/exam\/results\/[^/]+\/view$/.test(path)) {
+      return {
+        section: 'EXAMS',
+        headerName: 'Quiz',
+        pageName: 'Result Details',
+        icon: 'fa-solid fa-square-poll-vertical',
+        direct: false,
+        href: path,
+      };
+    }
+
+    if (/^\/exam\/[^/]+$/.test(path)) {
+      return {
+        section: 'EXAMS',
+        headerName: 'Quiz',
+        pageName: 'Take Exam',
+        icon: 'fa-solid fa-file-pen',
+        direct: false,
+        href: path,
+      };
+    }
+
+    return {
+      section: inferSectionFromName(header?.name || page?.name || ''),
+      headerName: safeText(header?.name || 'Menu'),
+      pageName: safeText(page?.name || 'Page'),
+      icon: safeText(page?.icon_class || header?.icon_class || 'fa-solid fa-folder'),
+      direct: false,
+      href: safeText(page?.href || '#'),
+    };
+  }
+
+  function renderDynamicGroupedTree(tree){
+    if (!dynamicMenuWrap) return;
+    dynamicMenuWrap.innerHTML = '';
+
+    const buckets = {};
+
+    (tree || []).forEach((header) => {
+      const pages = Array.isArray(header?.children) ? header.children : [];
+      pages.forEach((page) => {
+        const meta = getMatchedMeta(page, header);
+        const section = meta.section || 'OTHER';
+        const headerKey = `${section}__${meta.headerName}`;
+
+        if (!buckets[section]) buckets[section] = {};
+        if (!buckets[section][headerKey]) {
+          buckets[section][headerKey] = {
+            headerName: meta.headerName || 'Menu',
+            headerIcon: meta.icon || 'fa-solid fa-folder',
+            direct: !!meta.direct,
+            children: []
+          };
+        }
+
+        const pageHref = safeText(meta.href || '#');
+        const exists = buckets[section][headerKey].children.some(x =>
+          normalizePath(x.href) === normalizePath(pageHref) && safeText(x.name) === safeText(meta.pageName)
+        );
+
+        if (!exists) {
+          buckets[section][headerKey].children.push({
+            href: pageHref || '#',
+            name: meta.pageName || 'Page'
+          });
+        }
+
+        if (!buckets[section][headerKey].headerIcon) {
+          buckets[section][headerKey].headerIcon = meta.icon || 'fa-solid fa-folder';
+        }
+      });
+    });
+
+    SECTION_ORDER.forEach((sectionName) => {
+      const headersMap = buckets[sectionName];
+      if (!headersMap || !Object.keys(headersMap).length) return;
+
+      const section = document.createElement('div');
+      section.innerHTML = `
+        <div class="w3-nav-section">
+          <div class="w3-section-title">
+            ${iconHtml(SECTION_ICONS[sectionName] || 'fa-solid fa-folder')}
+            <span>${sectionName}</span>
+          </div>
+          <div class="w3-section-rule"></div>
+        </div>
+        <nav class="w3-menu" aria-label="${sectionName}"></nav>
+      `;
+
+      const nav = section.querySelector('.w3-menu');
+
+      Object.values(headersMap).forEach((item, idx) => {
+        const children = Array.isArray(item.children) ? item.children : [];
+        if (!children.length) return;
+
+        if (item.direct && children.length === 1) {
+          const a = document.createElement('a');
+          a.className = 'w3-link';
+          a.href = safeText(children[0].href || '#');
+          a.innerHTML = `${iconHtml(item.headerIcon || 'fa-solid fa-folder')}<span>${safeText(children[0].name || item.headerName || 'Page')}</span>`;
+          nav.appendChild(a);
+          return;
+        }
+
+        const subId = `dyn-sub-${sectionName.toLowerCase()}-${idx}-${Math.random().toString(36).slice(2,7)}`;
+        const group = document.createElement('div');
+        group.className = 'w3-group';
+        group.innerHTML = `
+          <a href="#" class="w3-link w3-toggle" data-target="${subId}" aria-expanded="false">
+            ${iconHtml(item.headerIcon || 'fa-solid fa-folder')}
+            <span>${safeText(item.headerName || 'Menu')}</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="${subId}" class="w3-submenu" role="group" aria-label="${safeText(item.headerName || 'Menu')} submenu"></div>
+        `;
+
+        const sub = group.querySelector(`#${subId}`);
+        children.forEach((child) => {
+          const a = document.createElement('a');
+          a.className = 'w3-link';
+          a.href = safeText(child.href || '#');
+          a.innerHTML = `<span>${safeText(child.name || 'Page')}</span>`;
+          sub.appendChild(a);
+        });
+
+        nav.appendChild(group);
+      });
+
+      if (nav.children.length) dynamicMenuWrap.appendChild(section);
+    });
+
+    dynamicMenuWrap.style.display = dynamicMenuWrap.children.length ? '' : 'none';
+    bindSubmenuToggles(dynamicMenuWrap);
+    restoreOpenMenus(dynamicMenuWrap);
+  }
+
+  async function loadSidebarByToken(options = {}){
+    const token = getBearerToken();
+    const skipCachedRender = !!options.skipCachedRender;
+    const forceRefresh = !!options.forceRefresh;
+
+    if (!token) {
+      if (adminFullMenu) adminFullMenu.style.display = 'none';
+      if (dynamicMenuWrap) dynamicMenuWrap.style.display = 'none';
+      await showSessionExpiredPopup();
+      return false;
+    }
+
+    const cachedSidebar = readSidebarCache(token);
+    const cachedPayload = getSidebarPayload(cachedSidebar);
+
+    if (cachedPayload && !skipCachedRender) {
+      renderSidebarFromPayload(cachedPayload);
+    }
+
+    if (cachedPayload && !forceRefresh && getSidebarCacheAge(cachedSidebar) <= SIDEBAR_CACHE_TTL_MS) {
+      return true;
+    }
+
+    try{
+      const res = await fetch(API_SIDEBAR, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/json'
+        }
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = null;
+      }
+
+      if (!res.ok || data?.session_expired === true) {
+        if (adminFullMenu) adminFullMenu.style.display = 'none';
+        if (dynamicMenuWrap) dynamicMenuWrap.style.display = 'none';
+        await showSessionExpiredPopup(data?.message || 'Your session has expired. Please login again.');
+        return false;
+      }
+
+      writeSidebarCache(token, data);
+      return renderSidebarFromPayload(data);
+
+    }catch(e){
+      if (cachedPayload) {
+        return true;
+      }
+      if (adminFullMenu) adminFullMenu.style.display = 'none';
+      if (dynamicMenuWrap) dynamicMenuWrap.style.display = 'none';
+      return false;
+    }
+  }
+
+  async function performLogout(){
+    const token = getBearerToken();
+
+    const confirm = await Swal.fire({
+      title: 'Log out?',
+      text: 'You will be signed out of MSIT Home Builder.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, logout',
+      cancelButtonText: 'Cancel',
+      focusCancel: true,
+      confirmButtonColor: '#9E363A'
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    let ok = false;
+    if (token){
+      try{
+        const res = await fetch(API_LOGOUT, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Accept': 'application/json'
+          },
+          body: ''
+        });
+        ok = res.ok;
+      }catch(e){ ok = false; }
+    }
+
+    clearAuthStorage();
+
+    await Swal.fire({
+      title: ok ? 'Logged out' : 'Signed out locally',
+      text: ok ? 'See you soon 👋' : 'Your session was cleared on this device.',
+      icon: ok ? 'success' : 'info',
+      timer: 1200,
+      showConfirmButton: false
+    });
+
+    window.location.replace(LOGIN_PAGE);
+  }
+
+  document.getElementById('logoutBtnSidebar')?.addEventListener('click', (e) => { e.preventDefault(); performLogout(); });
+
+  $doc.on('click', '.w3-menu a[href]:not(.w3-toggle)', function(){
+    if (window.innerWidth < 992) {
+      closeSidebar();
+    }
+  });
+
+  (async () => {
+    let activeNavEl = null;
+
+    try{
+      bindSubmenuToggles(document);
+      restoreOpenMenus(document);
+
+      const bootToken = getBearerToken();
+      const bootCachedSidebar = readSidebarCache(bootToken);
+      const bootCachedPayload = getSidebarPayload(bootCachedSidebar);
+
+      if (bootCachedPayload) {
+        renderSidebarFromPayload(bootCachedPayload);
+        activeNavEl = markActiveLinks();
+      }
+
+      const [loaded] = await Promise.all([
+        loadSidebarByToken({ skipCachedRender: true }),
+        loadMiniProfile(),
+        loadHeaderNotifications()
+      ]);
+      if (loaded && !sessionExpiredShown) {
+        activeNavEl = markActiveLinks();
+      }
+    } finally {
+      if (!sessionExpiredShown) {
+        hideLoading();
+      }
+    }
+  })();
+
+  setInterval(() => {
+    if (!sessionExpiredShown && getBearerToken()) {
+      loadHeaderNotifications();
+    }
+  }, 60000);
+});
+</script>
+
+</body>
+</html>
