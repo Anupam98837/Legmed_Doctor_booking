@@ -62,6 +62,72 @@
   }
   .dropdown-item.text-danger{ color:var(--danger-color)!important; }
 
+  .usr-action-cell{
+    overflow:visible !important;
+    position:relative;
+  }
+  .usr-dd-btn{
+    min-width:32px;
+    width:32px;
+    height:32px;
+    padding:0;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .usr-dd-btn.is-open{
+    color:var(--accent-color);
+    border-color:var(--accent-color);
+    background:color-mix(in oklab, var(--accent-color) 10%, transparent);
+  }
+  .table tbody tr.is-selected{
+    background:var(--page-hover);
+  }
+
+  #usersFloatingMenu{
+    position:fixed;
+    top:0;
+    left:0;
+    min-width:220px;
+    max-width:min(260px, calc(100vw - 20px));
+    padding:6px;
+    background:var(--surface);
+    border:1px solid var(--line-strong);
+    border-radius:14px;
+    box-shadow:0 16px 40px rgba(15,23,42,.16);
+    z-index:1080;
+    display:none;
+  }
+  #usersFloatingMenu .usr-menu-item{
+    width:100%;
+    border:0;
+    background:transparent;
+    border-radius:10px;
+    padding:9px 10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-align:left;
+    color:var(--text-color);
+    font-size:13px;
+    line-height:1.2;
+  }
+  #usersFloatingMenu .usr-menu-item:hover{
+    background:var(--page);
+  }
+  #usersFloatingMenu .usr-menu-item.text-danger:hover{
+    background:color-mix(in oklab, var(--danger-color) 10%, transparent);
+  }
+  #usersFloatingMenu .usr-menu-item i{
+    width:16px;
+    text-align:center;
+    opacity:.85;
+  }
+  #usersFloatingMenu .dropdown-divider{
+    margin:6px 0;
+    border-top:1px solid var(--line-strong);
+  }
+
   .u-avatar{
     width:40px;
     height:40px;
@@ -339,13 +405,12 @@
               <th>Email</th>
               <th style="width:150px;">Phone</th>
               <th style="width:150px;">Role</th>
-              <th style="width:170px;">Folder</th>
               <th style="width:110px;" class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody id="usersTbody">
             <tr>
-              <td colspan="8" class="empty-state">
+              <td colspan="7" class="empty-state">
                 <i class="fa fa-circle-notch fa-spin mb-2" style="font-size:20px;"></i>
                 <div>Loading users…</div>
               </td>
@@ -392,13 +457,6 @@
           </div>
 
           <div class="col-12">
-            <label class="form-label">Folder</label>
-            <select id="modal_folder" class="form-select">
-              <option value="">All Folders</option>
-            </select>
-          </div>
-
-          <div class="col-12">
             <label class="form-label">Sort By</label>
             <select id="modal_sort" class="form-select">
               <option value="name">Name A-Z</option>
@@ -440,7 +498,7 @@
                 <i class="fa fa-folder-open me-1"></i> Browse Files
               </button>
               <div class="csv-help mt-3">
-                <div><strong>CSV Format:</strong> name, email, password, role, folder_uuid</div>
+                <div><strong>CSV Format:</strong> name, email, password, role</div>
                 <div class="mt-1 text-muted">You can also add: phone_number, alternative_email, alternative_phone_number, whatsapp_number, address</div>
                 <div class="mt-1">First row must contain header. Max file size: 10MB</div>
               </div>
@@ -562,14 +620,6 @@
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Folder</label>
-            <select class="form-select" id="userFolder">
-              <option value="">No Folder</option>
-            </select>
-            <div class="form-text">Optional: assign user into a folder group.</div>
           </div>
 
           <div class="col-md-6 js-pw-section">
@@ -700,6 +750,8 @@
   </div>
 </div>
 
+<div id="usersFloatingMenu" aria-hidden="true"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -716,7 +768,6 @@ document.addEventListener('DOMContentLoaded', function(){
     meRole: '/api/auth/me-role',
     users: '/api/users',
     usersAll: '/api/users/all?limit=1000',
-    folders: '/api/user-folders',
     importCsv: '/api/users/import-csv',
   };
 
@@ -726,15 +777,12 @@ document.addEventListener('DOMContentLoaded', function(){
     canDelete: false,
     rows: [],
     filteredRows: [],
-    folders: [],
-    folderMap: new Map(),
     page: 1,
     perPage: 20,
     search: '',
     filters: {
       status: 'all',
       role: '',
-      folder: '',
       sort: 'name',
     },
   };
@@ -752,7 +800,6 @@ document.addEventListener('DOMContentLoaded', function(){
   const filterModal     = bootstrap.Modal.getOrCreateInstance(filterModalEl);
   const modalStatus     = document.getElementById('modal_status');
   const modalRole       = document.getElementById('modal_role');
-  const modalFolder     = document.getElementById('modal_folder');
   const modalSort       = document.getElementById('modal_sort');
   const btnApplyFilters = document.getElementById('btnApplyFilters');
 
@@ -768,7 +815,6 @@ document.addEventListener('DOMContentLoaded', function(){
   const userPhoneInput = document.getElementById('userPhone');
   const userRoleInput  = document.getElementById('userRole');
   const userStatusInput= document.getElementById('userStatus');
-  const userFolderInput= document.getElementById('userFolder');
   const userPasswordInput  = document.getElementById('userPassword');
   const userPassword2Input = document.getElementById('userPasswordConfirmation');
   const userAltEmailInput  = document.getElementById('userAltEmail');
@@ -790,6 +836,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const cvUserUuidInput = document.getElementById('cv_user_uuid');
   const cvFileInput     = document.getElementById('cvFileInput');
   const cvUploadBtn     = document.getElementById('cvUploadBtn');
+  const usersFloatingMenu = document.getElementById('usersFloatingMenu');
 
   const importCsvModalEl   = document.getElementById('importCsvModal');
   const importCsvModal     = new bootstrap.Modal(importCsvModalEl);
@@ -911,16 +958,6 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<span class="badge-soft-inactive"><i class="fa fa-circle-xmark"></i> Inactive</span>';
   }
 
-  function getFolderName(folderId){
-    const key = String(folderId ?? '');
-    if (!key) return 'No Folder';
-    return state.folderMap.get(key) || ('Folder #' + key);
-  }
-
-  function folderPill(folderId){
-    return '<span class="folder-pill"><i class="fa fa-folder-open"></i> ' + esc(getFolderName(folderId)) + '</span>';
-  }
-
   function avatarHtml(user){
     const img = String(user.image || '').trim();
     if (img){
@@ -937,6 +974,69 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<div class="u-avatar-fallback">' + esc(initials) + '</div>';
   }
 
+  function buildFloatingMenuHtml(user){
+    const items = [
+      '<button type="button" class="usr-menu-item" data-action="assign_privilege"><i class="fa fa-key"></i><span>Assign Privilege</span></button>',
+      '<button type="button" class="usr-menu-item" data-action="view"><i class="fa fa-eye"></i><span>View</span></button>',
+    ];
+
+    if (state.canWrite){
+      items.push('<button type="button" class="usr-menu-item" data-action="edit"><i class="fa fa-pen-to-square"></i><span>Edit</span></button>');
+      items.push('<button type="button" class="usr-menu-item" data-action="password"><i class="fa fa-key"></i><span>Change Password</span></button>');
+      items.push('<button type="button" class="usr-menu-item" data-action="cv"><i class="fa fa-file-arrow-up"></i><span>Upload CV</span></button>');
+    }
+
+    if (state.canDelete){
+      items.push('<hr class="dropdown-divider">');
+      items.push('<button type="button" class="usr-menu-item text-danger" data-action="delete"><i class="fa fa-trash"></i><span>Delete</span></button>');
+    }
+
+    return items.join('');
+  }
+
+  function clearSelectedRows(){
+    document.querySelectorAll('.usr-dd-btn.is-open').forEach(btn => {
+      btn.classList.remove('is-open');
+      btn.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('#usersTbody tr.is-selected').forEach(row => row.classList.remove('is-selected'));
+  }
+
+  function hideFloatingMenu(){
+    if (!usersFloatingMenu) return;
+    usersFloatingMenu.style.display = 'none';
+    usersFloatingMenu.style.visibility = 'hidden';
+    usersFloatingMenu.innerHTML = '';
+    usersFloatingMenu.setAttribute('aria-hidden', 'true');
+    delete usersFloatingMenu.dataset.userId;
+    delete usersFloatingMenu.dataset.userUuid;
+    delete usersFloatingMenu.dataset.userName;
+    clearSelectedRows();
+  }
+
+  function positionFloatingMenu(button){
+    if (!usersFloatingMenu || !button) return;
+
+    const rect = button.getBoundingClientRect();
+    const gap = 8;
+
+    let left = rect.right - usersFloatingMenu.offsetWidth;
+    let top = rect.bottom + gap;
+
+    if (left < 10) left = 10;
+    if (left + usersFloatingMenu.offsetWidth > window.innerWidth - 10){
+      left = Math.max(10, window.innerWidth - usersFloatingMenu.offsetWidth - 10);
+    }
+
+    if (top + usersFloatingMenu.offsetHeight > window.innerHeight - 10){
+      const aboveTop = rect.top - usersFloatingMenu.offsetHeight - gap;
+      top = aboveTop >= 10 ? aboveTop : Math.max(10, window.innerHeight - usersFloatingMenu.offsetHeight - 10);
+    }
+
+    usersFloatingMenu.style.top = top + 'px';
+    usersFloatingMenu.style.left = left + 'px';
+  }
+
   function getFilteredRows(){
     let rows = [...state.rows];
     const q = state.search.trim().toLowerCase();
@@ -947,7 +1047,6 @@ document.addEventListener('DOMContentLoaded', function(){
           row.name,
           row.email,
           row.phone_number,
-          getFolderName(row.user_folder_id),
           roleLabel(row.role),
         ].some(v => String(v || '').toLowerCase().includes(q));
       });
@@ -959,10 +1058,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
     if (state.filters.role){
       rows = rows.filter(row => normalizeRoleToken(row.role) === state.filters.role);
-    }
-
-    if (state.filters.folder){
-      rows = rows.filter(row => String(row.user_folder_id ?? '') === String(state.filters.folder));
     }
 
     const sort = state.filters.sort || 'name';
@@ -1017,6 +1112,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function render(){
+    hideFloatingMenu();
     state.filteredRows = getFilteredRows();
 
     const perPage = Number(state.perPage) || 20;
@@ -1031,7 +1127,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if (!pageRows.length){
       usersTbody.innerHTML = `
         <tr>
-          <td colspan="8" class="empty-state">
+          <td colspan="7" class="empty-state">
             <i class="fa fa-users-slash mb-2" style="font-size:20px;"></i>
             <div>No users found.</div>
           </td>
@@ -1039,21 +1135,8 @@ document.addEventListener('DOMContentLoaded', function(){
       `;
     } else {
       usersTbody.innerHTML = pageRows.map(user => {
-        const actions = [];
-        actions.push(`<button type="button" class="dropdown-item js-view" data-id="${esc(user.id)}"><i class="fa fa-eye"></i> View</button>`);
-
-        if (state.canWrite){
-          actions.push(`<button type="button" class="dropdown-item js-edit" data-id="${esc(user.id)}"><i class="fa fa-pen"></i> Edit</button>`);
-          actions.push(`<button type="button" class="dropdown-item js-password" data-id="${esc(user.id)}" data-name="${esc(user.name || '')}"><i class="fa fa-key"></i> Change Password</button>`);
-          actions.push(`<button type="button" class="dropdown-item js-cv" data-uuid="${esc(user.uuid || '')}" data-name="${esc(user.name || '')}"><i class="fa fa-file-arrow-up"></i> Upload CV</button>`);
-        }
-
-        if (state.canDelete){
-          actions.push(`<button type="button" class="dropdown-item text-danger js-delete" data-id="${esc(user.id)}" data-name="${esc(user.name || '')}"><i class="fa fa-trash"></i> Delete</button>`);
-        }
-
         return `
-          <tr>
+          <tr data-id="${esc(user.id)}" data-uuid="${esc(user.uuid || '')}" data-name="${esc(user.name || '')}" data-role="${esc(normalizeRoleToken(user.role))}">
             <td>${statusBadge(user.status)}</td>
             <td>${avatarHtml(user)}</td>
             <td>
@@ -1066,16 +1149,10 @@ document.addEventListener('DOMContentLoaded', function(){
             </td>
             <td>${esc(user.phone_number || '—')}</td>
             <td><span class="badge-role">${esc(roleLabel(user.role))}</span></td>
-            <td>${folderPill(user.user_folder_id)}</td>
-            <td class="text-end">
-              <div class="dropdown">
-                <button class="btn btn-light btn-sm dd-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                  <i class="fa fa-ellipsis-v"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-end">
-                  ${actions.join('')}
-                </div>
-              </div>
+            <td class="text-end usr-action-cell">
+              <button type="button" class="btn btn-light btn-sm usr-dd-btn js-action-toggle" aria-label="Actions" aria-expanded="false" title="Actions">
+                <i class="fa fa-ellipsis-vertical"></i>
+              </button>
             </td>
           </tr>
         `;
@@ -1091,48 +1168,10 @@ document.addEventListener('DOMContentLoaded', function(){
     renderPager(totalPages);
   }
 
-  async function loadFolders(){
-    try{
-      const data = await fetchJson(API.folders);
-      const rows = Array.isArray(data.data) ? data.data : (Array.isArray(data.folders) ? data.folders : []);
-      state.folders = rows.map(row => ({
-        id: row.id,
-        uuid: row.uuid,
-        name: row.name || row.title || ('Folder #' + row.id),
-      }));
-
-      state.folderMap = new Map(state.folders.map(f => [String(f.id), String(f.name)]));
-      populateFolderSelects();
-    }catch(ex){
-      console.warn('Could not load folders', ex);
-      state.folders = [];
-      state.folderMap = new Map();
-      populateFolderSelects();
-    }
-  }
-
-  function populateFolderSelects(){
-    const options = state.folders.map(f =>
-      `<option value="${esc(String(f.id))}">${esc(String(f.name))}</option>`
-    ).join('');
-
-    if (modalFolder){
-      const keep = modalFolder.value || '';
-      modalFolder.innerHTML = `<option value="">All Folders</option>${options}`;
-      modalFolder.value = keep;
-    }
-
-    if (userFolderInput){
-      const keep = userFolderInput.value || '';
-      userFolderInput.innerHTML = `<option value="">No Folder</option>${options}`;
-      userFolderInput.value = keep;
-    }
-  }
-
   async function loadUsers(){
     usersTbody.innerHTML = `
       <tr>
-        <td colspan="8" class="empty-state">
+        <td colspan="7" class="empty-state">
           <i class="fa fa-circle-notch fa-spin mb-2" style="font-size:20px;"></i>
           <div>Loading users…</div>
         </td>
@@ -1150,7 +1189,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }catch(ex){
       usersTbody.innerHTML = `
         <tr>
-          <td colspan="8" class="empty-state">
+          <td colspan="7" class="empty-state">
             <i class="fa fa-triangle-exclamation mb-2" style="font-size:20px;"></i>
             <div>${esc(ex.message || 'Failed to load users')}</div>
           </td>
@@ -1221,7 +1260,6 @@ document.addEventListener('DOMContentLoaded', function(){
       userPhoneInput.value = user.phone_number || '';
       userRoleInput.value = normalizeRoleToken(user.role || '');
       userStatusInput.value = user.status || 'active';
-      userFolderInput.value = user.user_folder_id ?? '';
       userAltEmailInput.value = user.alternative_email || '';
       userAltPhoneInput.value = user.alternative_phone_number || '';
       userWhatsAppInput.value = user.whatsapp_number || '';
@@ -1243,6 +1281,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   async function openViewModal(id){
+    hideFloatingMenu();
     userViewBody.innerHTML = 'Loading…';
     userViewModal.show();
 
@@ -1269,10 +1308,6 @@ document.addEventListener('DOMContentLoaded', function(){
           <div class="detail-card">
             <div class="detail-label">Phone</div>
             <div class="detail-value">${esc(user.phone_number || '—')}</div>
-          </div>
-          <div class="detail-card">
-            <div class="detail-label">Folder</div>
-            <div class="detail-value">${esc(getFolderName(user.user_folder_id))}</div>
           </div>
           <div class="detail-card">
             <div class="detail-label">Alternative Email</div>
@@ -1306,6 +1341,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   async function confirmDelete(id, name){
+    hideFloatingMenu();
     const res = await Swal.fire({
       title: 'Delete user?',
       text: `This will soft-delete ${name || 'this user'}.`,
@@ -1328,6 +1364,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   async function promptPasswordChange(id, name){
+    hideFloatingMenu();
     const result = await Swal.fire({
       title: `Change password${name ? ' — ' + name : ''}`,
       html: `
@@ -1369,6 +1406,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function openCvModal(uuid, name){
+    hideFloatingMenu();
     cvUserUuidInput.value = uuid || '';
     cvUserName.textContent = name || 'User';
     cvFileInput.value = '';
@@ -1421,7 +1459,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   function downloadCsvTemplate(){
     const content = [
-      'name,email,password,role,folder_uuid,phone_number,alternative_email,alternative_phone_number,whatsapp_number,address',
+      'name,email,password,role,phone_number,alternative_email,alternative_phone_number,whatsapp_number,address',
       'John Doe,john@example.com,Patient@123,patient,,9876543210,,,,Kolkata',
       'Dr Smith,doctor@example.com,Doctor@123,doctor,,9123456780,,,,Mumbai',
     ].join('\n');
@@ -1453,8 +1491,6 @@ document.addEventListener('DOMContentLoaded', function(){
     if (userAddressInput.value.trim()) fd.append('address', userAddressInput.value.trim());
     if (userRoleInput.value) fd.append('role', userRoleInput.value);
     if (userStatusInput.value) fd.append('status', userStatusInput.value);
-    fd.append('user_folder_id', userFolderInput.value || '');
-
     if (!isEdit){
       if (!userPasswordInput.value.trim() || userPasswordInput.value.trim().length < 8){
         return err('Password must be at least 8 characters');
@@ -1623,7 +1659,6 @@ document.addEventListener('DOMContentLoaded', function(){
     btnApplyFilters.addEventListener('click', () => {
       state.filters.status = modalStatus.value || 'all';
       state.filters.role = modalRole.value || '';
-      state.filters.folder = modalFolder.value || '';
       state.filters.sort = modalSort.value || 'name';
       state.page = 1;
       filterModal.hide();
@@ -1637,7 +1672,6 @@ document.addEventListener('DOMContentLoaded', function(){
       state.filters = {
         status: 'all',
         role: '',
-        folder: '',
         sort: 'name',
       };
 
@@ -1645,7 +1679,6 @@ document.addEventListener('DOMContentLoaded', function(){
       searchInput.value = '';
       modalStatus.value = 'all';
       modalRole.value = '';
-      modalFolder.value = '';
       modalSort.value = 'name';
       render();
     });
@@ -1687,21 +1720,89 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     });
 
-    usersTbody.addEventListener('click', async (e) => {
-      const viewBtn = e.target.closest('.js-view');
-      if (viewBtn) return openViewModal(viewBtn.dataset.id);
+    usersTbody.addEventListener('click', (e) => {
+      const actionToggle = e.target.closest('.js-action-toggle');
+      if (!actionToggle) return;
 
-      const editBtn = e.target.closest('.js-edit');
-      if (editBtn) return openEditModal(editBtn.dataset.id);
+      e.preventDefault();
+      e.stopPropagation();
 
-      const passBtn = e.target.closest('.js-password');
-      if (passBtn) return promptPasswordChange(passBtn.dataset.id, passBtn.dataset.name);
+      const row = actionToggle.closest('tr');
+      if (!row || !usersFloatingMenu) return;
 
-      const cvBtn = e.target.closest('.js-cv');
-      if (cvBtn) return openCvModal(cvBtn.dataset.uuid, cvBtn.dataset.name);
+      const rowId = String(row.dataset.id || '');
+      if (!rowId) return;
 
-      const delBtn = e.target.closest('.js-delete');
-      if (delBtn) return confirmDelete(delBtn.dataset.id, delBtn.dataset.name);
+      if (usersFloatingMenu.style.display === 'block' && usersFloatingMenu.dataset.userId === rowId){
+        hideFloatingMenu();
+        return;
+      }
+
+      clearSelectedRows();
+      row.classList.add('is-selected');
+      actionToggle.classList.add('is-open');
+      actionToggle.setAttribute('aria-expanded', 'true');
+
+      usersFloatingMenu.innerHTML = buildFloatingMenuHtml({
+        id: rowId,
+        uuid: row.dataset.uuid || '',
+        name: row.dataset.name || '',
+        role: row.dataset.role || '',
+      });
+      usersFloatingMenu.dataset.userId = rowId;
+      usersFloatingMenu.dataset.userUuid = row.dataset.uuid || '';
+      usersFloatingMenu.dataset.userName = row.dataset.name || '';
+      usersFloatingMenu.style.display = 'block';
+      usersFloatingMenu.style.visibility = 'hidden';
+
+      requestAnimationFrame(() => {
+        positionFloatingMenu(actionToggle);
+        usersFloatingMenu.style.visibility = 'visible';
+        usersFloatingMenu.setAttribute('aria-hidden', 'false');
+      });
+    });
+
+    document.addEventListener('click', async (e) => {
+      const actionBtn = e.target.closest('#usersFloatingMenu [data-action]');
+      if (!actionBtn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const action = actionBtn.dataset.action || '';
+      const userId = usersFloatingMenu?.dataset.userId || '';
+      const userUuid = usersFloatingMenu?.dataset.userUuid || '';
+      const userName = usersFloatingMenu?.dataset.userName || '';
+
+      if (!userId && !userUuid) return;
+
+      hideFloatingMenu();
+
+      if (action === 'assign_privilege'){
+        const query = new URLSearchParams();
+        if (userUuid) query.set('user_uuid', userUuid);
+        if (userId) query.set('user_id', userId);
+        window.location.href = '/user-privileges/manage?' + query.toString();
+        return;
+      }
+
+      if (action === 'view') return openViewModal(userId);
+      if (action === 'edit') return openEditModal(userId);
+      if (action === 'password') return promptPasswordChange(userId, userName);
+      if (action === 'cv') return openCvModal(userUuid, userName);
+      if (action === 'delete') return confirmDelete(userId, userName);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#usersFloatingMenu, .js-action-toggle')){
+        hideFloatingMenu();
+      }
+    });
+
+    window.addEventListener('scroll', hideFloatingMenu, true);
+    window.addEventListener('resize', hideFloatingMenu);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideFloatingMenu();
     });
 
     csvBrowseBtn.addEventListener('click', () => csvFileInput.click());
@@ -1741,7 +1842,6 @@ document.addEventListener('DOMContentLoaded', function(){
   (async function init(){
     bindEvents();
     await ensureRole();
-    await loadFolders();
     await loadUsers();
   })();
 });

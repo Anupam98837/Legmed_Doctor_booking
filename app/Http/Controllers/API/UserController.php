@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\API\Concerns\PersistsAdminNotifications;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    use PersistsAdminNotifications;
+
     /** FQCN stored in personal_access_tokens.tokenable_type */
     private const USER_TYPE = 'App\\Models\\User';
 
@@ -351,6 +354,24 @@ class UserController extends Controller
                 request: $request
             );
 
+            $this->notifyAdmins(
+                'Patient registered',
+                ($user->name ?? $name) . ' registered successfully.',
+                [
+                    'action' => 'patient_registered',
+                    'module' => 'users',
+                    'user'   => [
+                        'id'    => (int) $user->id,
+                        'uuid'  => (string) ($user->uuid ?? ''),
+                        'name'  => (string) ($user->name ?? $name),
+                        'email' => (string) ($user->email ?? $data['email']),
+                        'role'  => (string) ($user->role ?? $role),
+                    ],
+                ],
+                $this->manageUsersLink((int) $user->id),
+                'user'
+            );
+
             return response()->json([
                 'status'       => 'success',
                 'message'      => 'Patient registered successfully',
@@ -513,6 +534,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $actor = $this->currentActorContext($request);
+
         $v = Validator::make($request->all(), [
             'name'                     => 'required|string|max:150',
             'email'                    => 'required|email|max:255',
@@ -598,6 +621,46 @@ class UserController extends Controller
 
             $user = DB::table('users')->where('email', $data['email'])->first();
 
+            $this->logActivity(
+                activity: 'store',
+                title: 'User created',
+                description: 'A new user account was created.',
+                performedBy: $actor['id'] ?: (int) $user->id,
+                performedByName: $actor['name'] ?? ($user->name ?? null),
+                targetId: $user->id,
+                targetType: 'user',
+                properties: [
+                    'role'         => $actor['role'],
+                    'target_role'  => $user->role ?? $role,
+                    'name'         => $user->name ?? $data['name'],
+                    'email'        => $user->email ?? $data['email'],
+                    'phone_number' => $user->phone_number ?? ($data['phone_number'] ?? null),
+                    'status'       => $user->status ?? ($data['status'] ?? 'active'),
+                ],
+                request: $request
+            );
+
+            $this->notifyAdmins(
+                'User created',
+                ($user->name ?? $data['name']) . ' was created successfully.',
+                [
+                    'action'     => 'created',
+                    'module'     => 'users',
+                    'actor_id'   => $actor['id'],
+                    'actor_role' => $actor['role'],
+                    'user'       => [
+                        'id'     => (int) $user->id,
+                        'uuid'   => (string) ($user->uuid ?? ''),
+                        'name'   => (string) ($user->name ?? $data['name']),
+                        'email'  => (string) ($user->email ?? $data['email']),
+                        'role'   => (string) ($user->role ?? $role),
+                        'status' => (string) ($user->status ?? ($data['status'] ?? 'active')),
+                    ],
+                ],
+                $this->manageUsersLink((int) $user->id),
+                'user'
+            );
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'User created',
@@ -622,6 +685,8 @@ class UserController extends Controller
      */
     public function uploadCvByUuid(Request $request, string $uuid)
     {
+        $actor = $this->currentActorContext($request);
+
         $v = Validator::make($request->all(), [
             'cv' => 'required|file|max:10240|mimes:pdf,doc,docx',
         ]);
@@ -682,6 +747,42 @@ class UserController extends Controller
             }
 
             $fresh = DB::table('users')->where('id', $locked->id)->first();
+
+            $this->logActivity(
+                activity: 'upload_cv',
+                title: 'User CV uploaded',
+                description: 'A user CV was uploaded or replaced.',
+                performedBy: $actor['id'] ?: (int) $fresh->id,
+                performedByName: $actor['name'] ?? ($fresh->name ?? null),
+                targetId: $fresh->id,
+                targetType: 'user',
+                properties: [
+                    'role'          => $actor['role'],
+                    'target_role'   => $fresh->role ?? null,
+                    'cv_path'       => (string) ($fresh->cv ?? ''),
+                    'replaced_old'  => !empty($oldCv),
+                ],
+                request: $request
+            );
+
+            $this->notifyAdmins(
+                'User CV updated',
+                ($fresh->name ?? 'A user') . '\'s CV was uploaded.',
+                [
+                    'action'     => 'upload_cv',
+                    'module'     => 'users',
+                    'actor_id'   => $actor['id'],
+                    'actor_role' => $actor['role'],
+                    'user'       => [
+                        'id'   => (int) $fresh->id,
+                        'uuid' => (string) ($fresh->uuid ?? ''),
+                        'name' => (string) ($fresh->name ?? ''),
+                        'role' => (string) ($fresh->role ?? ''),
+                    ],
+                ],
+                $this->manageUsersLink((int) $fresh->id),
+                'user'
+            );
 
             return response()->json([
                 'status'  => 'success',
@@ -851,6 +952,8 @@ class UserController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        $actor = $this->currentActorContext($request);
+
         $v = Validator::make($request->all(), [
             'name'                     => 'sometimes|string|max:150',
             'email'                    => 'sometimes|email|max:255',
@@ -951,6 +1054,48 @@ class UserController extends Controller
 
         $fresh = DB::table('users')->where('id', $id)->first();
 
+        $changedKeys = array_values(array_filter(array_keys($updates), fn ($key) => $key !== 'updated_at'));
+
+        $this->logActivity(
+            activity: 'update',
+            title: 'User updated',
+            description: 'A user account was updated.',
+            performedBy: $actor['id'] ?: (int) $fresh->id,
+            performedByName: $actor['name'] ?? ($fresh->name ?? null),
+            targetId: $fresh->id,
+            targetType: 'user',
+            properties: [
+                'role'          => $actor['role'],
+                'target_role'   => $fresh->role ?? null,
+                'changed_fields'=> $changedKeys,
+                'email'         => $fresh->email ?? null,
+                'status'        => $fresh->status ?? null,
+            ],
+            request: $request
+        );
+
+        $this->notifyAdmins(
+            'User updated',
+            ($fresh->name ?? 'A user') . ' was updated.',
+            [
+                'action'        => 'updated',
+                'module'        => 'users',
+                'actor_id'      => $actor['id'],
+                'actor_role'    => $actor['role'],
+                'changed_fields'=> $changedKeys,
+                'user'          => [
+                    'id'     => (int) $fresh->id,
+                    'uuid'   => (string) ($fresh->uuid ?? ''),
+                    'name'   => (string) ($fresh->name ?? ''),
+                    'email'  => (string) ($fresh->email ?? ''),
+                    'role'   => (string) ($fresh->role ?? ''),
+                    'status' => (string) ($fresh->status ?? ''),
+                ],
+            ],
+            $this->manageUsersLink((int) $fresh->id),
+            'user'
+        );
+
         return response()->json([
             'status'  => 'success',
             'message' => 'User updated',
@@ -964,6 +1109,8 @@ class UserController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
+        $actor = $this->currentActorContext($request);
+
         $actorId = $this->currentUserId($request);
         if ($actorId !== null && $actorId === $id) {
             return response()->json(['status' => 'error', 'message' => "You can't delete your own account"], 422);
@@ -980,6 +1127,43 @@ class UserController extends Controller
             'updated_at' => now(),
         ]);
 
+        $this->logActivity(
+            activity: 'destroy',
+            title: 'User soft deleted',
+            description: 'A user account was soft deleted.',
+            performedBy: $actor['id'] ?: (int) $user->id,
+            performedByName: $actor['name'] ?? ($user->name ?? null),
+            targetId: $user->id,
+            targetType: 'user',
+            properties: [
+                'role'        => $actor['role'],
+                'target_role' => $user->role ?? null,
+                'email'       => $user->email ?? null,
+                'status'      => 'inactive',
+            ],
+            request: $request
+        );
+
+        $this->notifyAdmins(
+            'User deleted',
+            ($user->name ?? 'A user') . ' was moved to inactive/deleted state.',
+            [
+                'action'     => 'soft_deleted',
+                'module'     => 'users',
+                'actor_id'   => $actor['id'],
+                'actor_role' => $actor['role'],
+                'user'       => [
+                    'id'    => (int) $user->id,
+                    'uuid'  => (string) ($user->uuid ?? ''),
+                    'name'  => (string) ($user->name ?? ''),
+                    'email' => (string) ($user->email ?? ''),
+                    'role'  => (string) ($user->role ?? ''),
+                ],
+            ],
+            $this->manageUsersLink((int) $user->id),
+            'user'
+        );
+
         return response()->json(['status' => 'success', 'message' => 'User soft-deleted']);
     }
 
@@ -988,6 +1172,8 @@ class UserController extends Controller
      */
     public function restore(Request $request, int $id)
     {
+        $actor = $this->currentActorContext($request);
+
         $user = DB::table('users')->where('id', $id)->whereNotNull('deleted_at')->first();
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'User not found or not deleted'], 404);
@@ -999,6 +1185,43 @@ class UserController extends Controller
             'updated_at' => now(),
         ]);
 
+        $this->logActivity(
+            activity: 'restore',
+            title: 'User restored',
+            description: 'A deleted user account was restored.',
+            performedBy: $actor['id'] ?: (int) $user->id,
+            performedByName: $actor['name'] ?? ($user->name ?? null),
+            targetId: $user->id,
+            targetType: 'user',
+            properties: [
+                'role'        => $actor['role'],
+                'target_role' => $user->role ?? null,
+                'email'       => $user->email ?? null,
+                'status'      => 'active',
+            ],
+            request: $request
+        );
+
+        $this->notifyAdmins(
+            'User restored',
+            ($user->name ?? 'A user') . ' was restored.',
+            [
+                'action'     => 'restored',
+                'module'     => 'users',
+                'actor_id'   => $actor['id'],
+                'actor_role' => $actor['role'],
+                'user'       => [
+                    'id'    => (int) $user->id,
+                    'uuid'  => (string) ($user->uuid ?? ''),
+                    'name'  => (string) ($user->name ?? ''),
+                    'email' => (string) ($user->email ?? ''),
+                    'role'  => (string) ($user->role ?? ''),
+                ],
+            ],
+            $this->manageUsersLink((int) $user->id),
+            'user'
+        );
+
         return response()->json(['status' => 'success', 'message' => 'User restored']);
     }
 
@@ -1007,6 +1230,8 @@ class UserController extends Controller
      */
     public function forceDelete(Request $request, int $id)
     {
+        $actor = $this->currentActorContext($request);
+
         $actorId = $this->currentUserId($request);
         if ($actorId !== null && $actorId === $id) {
             return response()->json(['status' => 'error', 'message' => "You can't delete your own account"], 422);
@@ -1022,6 +1247,43 @@ class UserController extends Controller
 
         DB::table('users')->where('id', $id)->delete();
 
+        $this->logActivity(
+            activity: 'force_delete',
+            title: 'User permanently deleted',
+            description: 'A user account was permanently deleted.',
+            performedBy: $actor['id'] ?: (int) $user->id,
+            performedByName: $actor['name'] ?? ($user->name ?? null),
+            targetId: $user->id,
+            targetType: 'user',
+            properties: [
+                'role'        => $actor['role'],
+                'target_role' => $user->role ?? null,
+                'email'       => $user->email ?? null,
+            ],
+            request: $request
+        );
+
+        $this->notifyAdmins(
+            'User permanently deleted',
+            ($user->name ?? 'A user') . ' was permanently deleted.',
+            [
+                'action'     => 'force_deleted',
+                'module'     => 'users',
+                'actor_id'   => $actor['id'],
+                'actor_role' => $actor['role'],
+                'user'       => [
+                    'id'    => (int) $user->id,
+                    'uuid'  => (string) ($user->uuid ?? ''),
+                    'name'  => (string) ($user->name ?? ''),
+                    'email' => (string) ($user->email ?? ''),
+                    'role'  => (string) ($user->role ?? ''),
+                ],
+            ],
+            '/user/manage',
+            'user',
+            'high'
+        );
+
         return response()->json(['status' => 'success', 'message' => 'User permanently deleted']);
     }
 
@@ -1030,6 +1292,8 @@ class UserController extends Controller
      */
     public function updatePassword(Request $request, int $id)
     {
+        $actor = $this->currentActorContext($request);
+
         $v = Validator::make($request->all(), [
             'password' => 'required|string|min:8',
         ]);
@@ -1048,6 +1312,43 @@ class UserController extends Controller
             'updated_at' => now(),
         ]);
 
+        $this->logActivity(
+            activity: 'update_password',
+            title: 'User password updated',
+            description: 'A user password was updated by an authorized actor.',
+            performedBy: $actor['id'] ?: (int) $user->id,
+            performedByName: $actor['name'] ?? ($user->name ?? null),
+            targetId: $user->id,
+            targetType: 'user',
+            properties: [
+                'role'        => $actor['role'],
+                'target_role' => $user->role ?? null,
+                'email'       => $user->email ?? null,
+            ],
+            request: $request
+        );
+
+        $this->notifyAdmins(
+            'User password updated',
+            'Password was updated for ' . ($user->name ?? 'a user') . '.',
+            [
+                'action'     => 'password_updated',
+                'module'     => 'users',
+                'actor_id'   => $actor['id'],
+                'actor_role' => $actor['role'],
+                'user'       => [
+                    'id'    => (int) $user->id,
+                    'uuid'  => (string) ($user->uuid ?? ''),
+                    'name'  => (string) ($user->name ?? ''),
+                    'email' => (string) ($user->email ?? ''),
+                    'role'  => (string) ($user->role ?? ''),
+                ],
+            ],
+            $this->manageUsersLink((int) $user->id),
+            'user',
+            'high'
+        );
+
         return response()->json(['status' => 'success', 'message' => 'Password updated']);
     }
 
@@ -1056,6 +1357,8 @@ class UserController extends Controller
      */
     public function updateImage(Request $request, int $id)
     {
+        $actor = $this->currentActorContext($request);
+
         $v = Validator::make($request->all(), [
             'image' => 'required|file|max:5120|mimes:jpg,jpeg,png,webp,gif,svg',
         ]);
@@ -1118,6 +1421,43 @@ class UserController extends Controller
 
         $fresh = DB::table('users')->where('id', $id)->first();
 
+        $this->logActivity(
+            activity: 'update_image',
+            title: 'User image updated',
+            description: 'A user profile image was updated.',
+            performedBy: $actor['id'] ?: (int) $fresh->id,
+            performedByName: $actor['name'] ?? ($fresh->name ?? null),
+            targetId: $fresh->id,
+            targetType: 'user',
+            properties: [
+                'role'          => $actor['role'],
+                'target_role'   => $fresh->role ?? null,
+                'email'         => $fresh->email ?? null,
+                'replaced_old'  => !empty($oldUrl),
+            ],
+            request: $request
+        );
+
+        $this->notifyAdmins(
+            'User image updated',
+            ($fresh->name ?? 'A user') . '\'s profile image was updated.',
+            [
+                'action'     => 'image_updated',
+                'module'     => 'users',
+                'actor_id'   => $actor['id'],
+                'actor_role' => $actor['role'],
+                'user'       => [
+                    'id'    => (int) $fresh->id,
+                    'uuid'  => (string) ($fresh->uuid ?? ''),
+                    'name'  => (string) ($fresh->name ?? ''),
+                    'email' => (string) ($fresh->email ?? ''),
+                    'role'  => (string) ($fresh->role ?? ''),
+                ],
+            ],
+            $this->manageUsersLink((int) $fresh->id),
+            'user'
+        );
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Image updated',
@@ -1130,6 +1470,8 @@ class UserController extends Controller
      */
     public function importUsersCsv(Request $request)
     {
+        $actor = $this->currentActorContext($request);
+
         $v = Validator::make($request->all(), [
             'file'             => 'required|file|max:10240|mimes:csv,txt',
             'default_password' => 'sometimes|nullable|string|min:6|max:100',
@@ -1286,6 +1628,41 @@ class UserController extends Controller
             DB::commit();
             fclose($handle);
 
+            $this->logActivity(
+                activity: 'import_csv',
+                title: 'Users CSV import completed',
+                description: 'Bulk user import from CSV finished.',
+                performedBy: $actor['id'],
+                performedByName: $actor['name'],
+                targetId: $actor['id'] ?: null,
+                targetType: 'users_csv_import',
+                properties: [
+                    'role'          => $actor['role'],
+                    'imported'      => $imported,
+                    'skipped'       => $skipped,
+                    'default_role'  => $defaultRole,
+                    'error_count'   => count($errors),
+                ],
+                request: $request
+            );
+
+            $this->notifyAdmins(
+                'Users CSV import completed',
+                $imported . ' user(s) were imported from CSV.',
+                [
+                    'action'      => 'import_csv',
+                    'module'      => 'users',
+                    'actor_id'    => $actor['id'],
+                    'actor_role'  => $actor['role'],
+                    'imported'    => $imported,
+                    'skipped'     => $skipped,
+                    'error_count' => count($errors),
+                    'default_role'=> $defaultRole,
+                ],
+                '/user/manage',
+                'user'
+            );
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'CSV import completed',
@@ -1307,6 +1684,291 @@ class UserController extends Controller
                 'error'   => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * POST /api/profile
+     */
+    public function updateMyProfile(Request $request)
+    {
+        $actor = $this->currentActorContext($request);
+
+        $authId = $request->attributes->get('auth_user_id')
+            ?? $request->attributes->get('auth_tokenable_id')
+            ?? $this->currentUserId($request);
+
+        if (!$authId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $v = Validator::make($request->all(), [
+            'name'                     => 'sometimes|string|max:150',
+            'email'                    => 'sometimes|email|max:255',
+            'phone_number'             => 'sometimes|nullable|string|max:32',
+            'alternative_email'        => 'sometimes|nullable|email|max:255',
+            'alternative_phone_number' => 'sometimes|nullable|string|max:32',
+            'whatsapp_number'          => 'sometimes|nullable|string|max:32',
+            'address'                  => 'sometimes|nullable|string',
+            'image'                    => 'sometimes|file|mimes:jpg,jpeg,png,webp,gif,svg|max:5120',
+        ]);
+
+        if ($v->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $v->errors(),
+            ], 422);
+        }
+
+        $data = $v->validated();
+
+        $existing = DB::table('users')
+            ->where('id', (int) $authId)
+            ->whereNull('deleted_at')
+            ->first();
+
+        if (!$existing || (isset($existing->status) && $existing->status !== 'active')) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        if (array_key_exists('email', $data)) {
+            if (DB::table('users')
+                ->where('email', $data['email'])
+                ->where('id', '!=', (int) $authId)
+                ->whereNull('deleted_at')
+                ->exists()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Email already exists',
+                ], 422);
+            }
+        }
+
+        if (array_key_exists('phone_number', $data) && !empty($data['phone_number'])) {
+            if (DB::table('users')
+                ->where('phone_number', $data['phone_number'])
+                ->where('id', '!=', (int) $authId)
+                ->whereNull('deleted_at')
+                ->exists()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Phone number already exists',
+                ], 422);
+            }
+        }
+
+        $updates = [];
+        foreach ([
+            'name',
+            'email',
+            'phone_number',
+            'alternative_email',
+            'alternative_phone_number',
+            'whatsapp_number',
+            'address',
+        ] as $key) {
+            if (array_key_exists($key, $data)) {
+                $updates[$key] = $data[$key];
+            }
+        }
+
+        if (array_key_exists('name', $updates) && $updates['name'] !== $existing->name) {
+            $base = Str::slug((string) $updates['name']);
+            do {
+                $slug = $base . '-' . Str::lower(Str::random(24));
+            } while (DB::table('users')->where('slug', $slug)->where('id', '!=', (int) $authId)->exists());
+
+            $updates['slug'] = $slug;
+        }
+
+        $oldImage = null;
+        if ($request->hasFile('image')) {
+            $newUrl = $this->saveProfileImage($request->file('image'));
+            if ($newUrl === false) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Invalid image upload',
+                ], 422);
+            }
+
+            $updates['image'] = $newUrl;
+            $oldImage = $existing->image ?? null;
+        }
+
+        if (empty($updates)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Nothing to update',
+            ], 400);
+        }
+
+        $updates['updated_at'] = now();
+
+        DB::table('users')->where('id', (int) $authId)->update($updates);
+
+        if ($oldImage && array_key_exists('image', $updates)) {
+            $this->deleteManagedProfileImage($oldImage);
+        }
+
+        $fresh = DB::table('users')->where('id', (int) $authId)->first();
+
+        $changedKeys = array_values(array_filter(array_keys($updates), fn ($key) => $key !== 'updated_at'));
+
+        $this->logActivity(
+            activity: 'update_profile',
+            title: 'Profile updated',
+            description: 'A user updated their own profile.',
+            performedBy: $actor['id'] ?: (int) $fresh->id,
+            performedByName: $actor['name'] ?? ($fresh->name ?? null),
+            targetId: $fresh->id,
+            targetType: 'user',
+            properties: [
+                'role'          => $actor['role'] ?? ($fresh->role ?? null),
+                'changed_fields'=> $changedKeys,
+                'email'         => $fresh->email ?? null,
+            ],
+            request: $request,
+            module: 'profile'
+        );
+
+        $this->notifyAdmins(
+            'Profile updated',
+            ($fresh->name ?? 'A user') . ' updated their profile.',
+            [
+                'action'        => 'profile_updated',
+                'module'        => 'profile',
+                'actor_id'      => $actor['id'] ?: (int) $fresh->id,
+                'actor_role'    => $actor['role'] ?? ($fresh->role ?? null),
+                'changed_fields'=> $changedKeys,
+                'user'          => [
+                    'id'    => (int) $fresh->id,
+                    'uuid'  => (string) ($fresh->uuid ?? ''),
+                    'name'  => (string) ($fresh->name ?? ''),
+                    'email' => (string) ($fresh->email ?? ''),
+                    'role'  => (string) ($fresh->role ?? ''),
+                ],
+            ],
+            '/profile',
+            'profile'
+        );
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Profile updated successfully',
+            'user'    => $this->profilePayload($fresh),
+        ]);
+    }
+
+    /**
+     * PATCH /api/profile/password
+     */
+    public function updateMyPassword(Request $request)
+    {
+        $actor = $this->currentActorContext($request);
+
+        $authId = $request->attributes->get('auth_user_id')
+            ?? $request->attributes->get('auth_tokenable_id')
+            ?? $this->currentUserId($request);
+
+        if (!$authId) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $v = Validator::make($request->all(), [
+            'current_password'          => 'required|string',
+            'new_password'              => 'required|string|min:8|confirmed',
+            'new_password_confirmation' => 'required|string|min:8',
+        ]);
+
+        if ($v->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $v->errors(),
+            ], 422);
+        }
+
+        $data = $v->validated();
+
+        $user = DB::table('users')
+            ->where('id', (int) $authId)
+            ->whereNull('deleted_at')
+            ->first();
+
+        if (!$user || (isset($user->status) && $user->status !== 'active')) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        if (!Hash::check((string) $data['current_password'], (string) $user->password)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Current password is incorrect',
+            ], 422);
+        }
+
+        if (Hash::check((string) $data['new_password'], (string) $user->password)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'New password must be different from current password',
+            ], 422);
+        }
+
+        DB::table('users')->where('id', (int) $authId)->update([
+            'password'   => Hash::make((string) $data['new_password']),
+            'updated_at' => now(),
+        ]);
+
+        $this->logActivity(
+            activity: 'update_profile_password',
+            title: 'Profile password updated',
+            description: 'A user changed their own password.',
+            performedBy: $actor['id'] ?: (int) $user->id,
+            performedByName: $actor['name'] ?? ($user->name ?? null),
+            targetId: $user->id,
+            targetType: 'user',
+            properties: [
+                'role'  => $actor['role'] ?? ($user->role ?? null),
+                'email' => $user->email ?? null,
+            ],
+            request: $request,
+            module: 'profile'
+        );
+
+        $this->notifyAdmins(
+            'Profile password updated',
+            ($user->name ?? 'A user') . ' changed their password.',
+            [
+                'action'     => 'profile_password_updated',
+                'module'     => 'profile',
+                'actor_id'   => $actor['id'] ?: (int) $user->id,
+                'actor_role' => $actor['role'] ?? ($user->role ?? null),
+                'user'       => [
+                    'id'    => (int) $user->id,
+                    'uuid'  => (string) ($user->uuid ?? ''),
+                    'name'  => (string) ($user->name ?? ''),
+                    'email' => (string) ($user->email ?? ''),
+                    'role'  => (string) ($user->role ?? ''),
+                ],
+            ],
+            '/profile',
+            'profile',
+            'high'
+        );
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Password updated successfully',
+        ]);
     }
 
     /**
@@ -1339,27 +2001,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'user'   => [
-                'id'                       => (int) $user->id,
-                'uuid'                     => (string) ($user->uuid ?? ''),
-                'name'                     => (string) ($user->name ?? ''),
-                'email'                    => (string) ($user->email ?? ''),
-                'phone_number'             => (string) ($user->phone_number ?? ''),
-                'alternative_email'        => (string) ($user->alternative_email ?? ''),
-                'alternative_phone_number' => (string) ($user->alternative_phone_number ?? ''),
-                'whatsapp_number'          => (string) ($user->whatsapp_number ?? ''),
-                'image'                    => $this->publicImageUrl($user->image ?? null),
-                'cv'                       => $this->publicFileUrl($user->cv ?? null),
-                'address'                  => (string) ($user->address ?? ''),
-                'role'                     => (string) ($user->role ?? ''),
-                'role_short_form'          => (string) ($user->role_short_form ?? ''),
-                'slug'                     => (string) ($user->slug ?? ''),
-                'status'                   => (string) ($user->status ?? ''),
-                'last_login_at'            => $user->last_login_at,
-                'last_login_ip'            => $user->last_login_ip,
-                'created_at'               => $user->created_at,
-                'updated_at'               => $user->updated_at,
-            ],
+            'user'   => $this->profilePayload($user),
         ]);
     }
 
@@ -1410,6 +2052,61 @@ class UserController extends Controller
             ->first();
 
         return $rec ? (int) $rec->tokenable_id : null;
+    }
+
+    protected function currentActorContext(Request $request): array
+    {
+        $actorId = (int) (
+            $request->attributes->get('auth_user_id')
+            ?? $request->attributes->get('auth_tokenable_id')
+            ?? $this->currentUserId($request)
+            ?? 0
+        );
+
+        if ($actorId <= 0) {
+            return ['id' => 0, 'name' => null, 'role' => null];
+        }
+
+        $actor = DB::table('users')
+            ->select('id', 'name', 'role')
+            ->where('id', $actorId)
+            ->first();
+
+        return [
+            'id'   => $actor ? (int) $actor->id : $actorId,
+            'name' => $actor->name ?? null,
+            'role' => $actor->role ?? null,
+        ];
+    }
+
+    protected function manageUsersLink(?int $id = null): string
+    {
+        return $id ? '/user/manage?user_id=' . $id : '/user/manage';
+    }
+
+    protected function profilePayload(object $user): array
+    {
+        return [
+            'id'                       => (int) $user->id,
+            'uuid'                     => (string) ($user->uuid ?? ''),
+            'name'                     => (string) ($user->name ?? ''),
+            'email'                    => (string) ($user->email ?? ''),
+            'phone_number'             => (string) ($user->phone_number ?? ''),
+            'alternative_email'        => (string) ($user->alternative_email ?? ''),
+            'alternative_phone_number' => (string) ($user->alternative_phone_number ?? ''),
+            'whatsapp_number'          => (string) ($user->whatsapp_number ?? ''),
+            'image'                    => $this->publicImageUrl($user->image ?? null),
+            'cv'                       => $this->publicFileUrl($user->cv ?? null),
+            'address'                  => (string) ($user->address ?? ''),
+            'role'                     => (string) ($user->role ?? ''),
+            'role_short_form'          => (string) ($user->role_short_form ?? ''),
+            'slug'                     => (string) ($user->slug ?? ''),
+            'status'                   => (string) ($user->status ?? ''),
+            'last_login_at'            => $user->last_login_at,
+            'last_login_ip'            => $user->last_login_ip,
+            'created_at'               => $user->created_at,
+            'updated_at'               => $user->updated_at,
+        ];
     }
 
     protected function publicUserPayload(object $user): array

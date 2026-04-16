@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>@yield('title','MSIT Home Builder Admin')</title>
+  <title>@yield('title','Doctor Booking Admin')</title>
 
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/images/favicon/msit_logo.jpg') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/images/web/logo.png') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="{{ asset('/assets/css/common/main.css') }}">
+  <link rel="stylesheet" href="{{ asset('/assets/css/main.css') }}">
 
   @stack('styles')
   @yield('styles')
@@ -78,16 +78,20 @@
 
     .w3-sidebar-scroll{
       flex:1;
+      min-height:0;
       overflow:auto;
       padding:6px 8px;
       scroll-behavior:smooth;
     }
 
     .w3-sidebar-foot{
+      margin-top:auto;
       border-top:1px solid var(--w3-rail-border);
       padding:6px 8px;
       flex-shrink:0;
       background:var(--surface);
+      position:relative;
+      z-index:2;
     }
 
     .w3-nav-section{
@@ -672,7 +676,7 @@
 <aside id="sidebar" class="w3-sidebar" aria-label="Sidebar">
   <div class="w3-sidebar-head">
     <a href="/dashboard" class="w3-brand">
-      <img id="logo" src="{{ asset('/assets/media/images/web/logo.png') }}" alt="W3Techiez">
+      <img id="logo" src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
     </a>
   </div>
 
@@ -720,200 +724,13 @@
     <div id="adminFullMenu" style="display:none">
 
       <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-graduation-cap"></i> ACADEMICS</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Academics">
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-campus" aria-expanded="false">
-            <i class="fa-solid fa-building-columns"></i><span>Campus</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-campus" class="w3-submenu" role="group" aria-label="Campus submenu">
-            <a href="/campus/manage" class="w3-link">Manage Campus</a>
-          </div>
-        </div>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-institution" aria-expanded="false">
-            <i class="fa-solid fa-university"></i><span>Institution</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-institution" class="w3-submenu" role="group" aria-label="Institution submenu">
-            <a href="/institutions/manage" class="w3-link">Manage Institutions</a>
-          </div>
-        </div>
-
-        <a href="/departments" class="w3-link">
-          <i class="fa-solid fa-file-lines"></i><span>Departments</span>
-        </a>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-course" aria-expanded="false">
-            <i class="fa-solid fa-book-open"></i><span>Course</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-course" class="w3-submenu" role="group" aria-label="Course submenu">
-            <a href="/courses/manage" class="w3-link">Manage Courses</a>
-            <a href="/course-type/manage" class="w3-link">Course Type</a>
-            <a href="/affiliation/manage" class="w3-link">Manage Affiliation</a>
-          </div>
-        </div>
-
-        <a href="/syllabus/view" class="w3-link">
-          <i class="fa-solid fa-file-lines"></i><span>Syllabus</span>
-        </a>
-
-        <a href="/course-sections/manage" class="w3-link">
-          <i class="fa-solid fa-people-roof"></i><span>Section</span>
-        </a>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-intake" aria-expanded="false">
-            <i class="fa-solid fa-chalkboard-teacher"></i><span>Intake</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-intake" class="w3-submenu" role="group" aria-label="Intake submenu">
-            <a href="/intake-type/manage" class="w3-link">Manage Intake Type</a>
-            <a href="/reservation-type/manage" class="w3-link">Manage Reservation Type</a>
-            <a href="/intake/manage" class="w3-link">Manage Intake</a>
-          </div>
-        </div>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-subject" aria-expanded="false">
-            <i class="fa-solid fa-book"></i><span>Subject</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-subject" class="w3-submenu" role="group" aria-label="Subject submenu">
-            <a href="/subject-type/manage" class="w3-link">Subject Type</a>
-            <a href="/subject/manage" class="w3-link">Manage Subjects</a>
-            <a href="/faculty/subject/assign" class="w3-link">Assign Subjects</a>
-          </div>
-        </div>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-routine" aria-expanded="false">
-            <i class="fa-solid fa-calendar-days"></i><span>Routine</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-routine" class="w3-submenu" role="group" aria-label="Routine submenu">
-            <a href="/class-types/manage" class="w3-link">Class Type</a>
-            <a href="/routine" class="w3-link">Manage Routines</a>
-          </div>
-        </div>
-      </nav>
-
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-calculator"></i> ACCOUNTING</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Accounting">
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-accounting" aria-expanded="false">
-            <i class="fa-solid fa-wallet"></i><span>Fees</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-accounting" class="w3-submenu" role="group" aria-label="Fees submenu">
-            <a href="/feestructure/manage" class="w3-link">Fees Structure</a>
-            <a href="/fees" class="w3-link">Manage Fees</a>
-            <a href="/fees/collect/view" class="w3-link">Collect Fees</a>
-          </div>
-        </div>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-scholarship" aria-expanded="false">
-            <i class="fa-solid fa-award"></i><span>Scholarship</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-scholarship" class="w3-submenu" role="group" aria-label="Scholarship submenu">
-            <a href="/scholarship-type/manage" class="w3-link">Manage Scholarship Type</a>
-            <a href="/scholarship/manage/view" class="w3-link">Manage Scholarship</a>
-            <a href="/scholarship/assign/view" class="w3-link">Assign Scholarship</a>
-          </div>
-        </div>
-      </nav>
-
-      <div class="w3-nav-section">
         <div class="w3-section-title"><i class="fa-solid fa-users"></i> USERS</div>
         <div class="w3-section-rule"></div>
       </div>
       <nav class="w3-menu" aria-label="Users">
         <a href="/user/manage" class="w3-link">
-          <i class="fa-solid fa-user-group"></i><span>Users</span>
+          <i class="fa-solid fa-user-group"></i><span>Manage Users</span>
         </a>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-student" aria-expanded="false">
-            <i class="fa-solid fa-user-graduate"></i><span>Student</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-student" class="w3-submenu" role="group" aria-label="Student submenu">
-            <a href="/student/all" class="w3-link">All Students</a>
-            <a href="/student/register" class="w3-link">Register</a>
-            <a href="/student/promote" class="w3-link">Promote</a>
-            <a href="/exam/result/view" class="w3-link">Exam Result</a>
-          </div>
-        </div>
-      </nav>
-
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-file-lines"></i> CONTENT</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Content">
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-notice" aria-expanded="false">
-            <i class="fa-solid fa-bullhorn"></i><span>Notice</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-notice" class="w3-submenu" role="group" aria-label="Notice submenu">
-            <a href="/notice/create" class="w3-link">Create Notice</a>
-            <a href="/notice/manage" class="w3-link">Manage Notice</a>
-          </div>
-        </div>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-study-material" aria-expanded="false">
-            <i class="fa-solid fa-file-arrow-up"></i><span>Study Material</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-study-material" class="w3-submenu" role="group" aria-label="Study Material submenu">
-            <a href="/study-material/create" class="w3-link">Create Study Material</a>
-            <a href="/study-material/manage" class="w3-link">Manage Study Material</a>
-          </div>
-        </div>
-
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-assignments" aria-expanded="false">
-            <i class="fa-solid fa-file-signature"></i><span>Assignments</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-assignments" class="w3-submenu" role="group" aria-label="Assignments submenu">
-            <a href="/assignment/create" class="w3-link">Create Assignments</a>
-            <a href="/assignments/manage" class="w3-link">Manage Assignments</a>
-          </div>
-        </div>
-      </nav>
-
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-file-pen"></i> EXAMS</div>
-        <div class="w3-section-rule"></div>
-      </div>
-      <nav class="w3-menu" aria-label="Exams">
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-quizz" aria-expanded="false">
-            <i class="fa-solid fa-file-pen"></i><span>Quiz</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-quizz" class="w3-submenu" role="group" aria-label="Quiz submenu">
-            <a href="/quizz/create" class="w3-link">Create Quiz</a>
-            <a href="/quizz/manage" class="w3-link">Manage Quiz</a>
-            <a href="/quizz/questions/manage" class="w3-link">Question Bank</a>
-            <a href="/quizz/results" class="w3-link">All Results</a>
-          </div>
-        </div>
       </nav>
 
       <div class="w3-nav-section">
@@ -934,49 +751,37 @@
 
         <div class="w3-group">
           <a href="#" class="w3-link w3-toggle" data-target="sm-page-privilege" aria-expanded="false">
-            <i class="fa-solid fa-shield-halved"></i><span>Page Privilege</span>
+            <i class="fa-solid fa-shield-halved"></i><span>Page Privileges</span>
             <i class="fa fa-chevron-down w3-chev"></i>
           </a>
-          <div id="sm-page-privilege" class="w3-submenu" role="group" aria-label="Page Privilege submenu">
+          <div id="sm-page-privilege" class="w3-submenu" role="group" aria-label="Page Privileges submenu">
             <a href="/page-privilege/create" class="w3-link"><span>Create Page Privilege</span></a>
-            <a href="/page-privilege/manage" class="w3-link"><span>Manage Page Privilege</span></a>
-            <a href="/role-privileges/manage" class="w3-link"><span>Assign Role Privilege</span></a>
+            <a href="/page-privilege/manage" class="w3-link"><span>Manage Page Privileges</span></a>
           </div>
         </div>
+
+        <a href="/role-privileges/manage" class="w3-link">
+          <i class="fa-solid fa-user-shield"></i><span>Assign Role Privileges</span>
+        </a>
       </nav>
 
-      <div class="w3-nav-section">
-        <div class="w3-section-title"><i class="fa-solid fa-gear"></i> OPERATIONS</div>
+      <div class="w3-nav-section d-lg-none">
+        <div class="w3-section-title"><i class="fa-solid fa-house"></i> ACCOUNT</div>
         <div class="w3-section-rule"></div>
       </div>
-      <nav class="w3-menu" aria-label="Operations">
-        <a href="/activity-logs" class="w3-link">
-          <i class="fa-solid fa-clock-rotate-left"></i><span>Activity Logs</span>
-        </a>
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-settings" aria-expanded="false">
-            <i class="fa-solid fa-gear"></i><span>Settings</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-settings" class="w3-submenu" role="group" aria-label="Settings submenu">
-            <a href="/mailers/manage" class="w3-link"><span>Mailer</span></a>
-          </div>
-        </div>
-      </nav>
-
-    </div>
-
-    <div class="w3-nav-section d-lg-none">
-      <div class="w3-section-title"><i class="fa-solid fa-user"></i> ACCOUNT</div>
-      <div class="w3-section-rule"></div>
-    </div>
     <nav class="w3-menu d-lg-none" aria-label="Account">
-      <a href="/profile" class="w3-link"><i class="fa fa-id-badge"></i><span>Profile</span></a>
-      <a href="/settings" class="w3-link"><i class="fa fa-gear"></i><span>Settings</span></a>
-    </nav>
+        <a href="/dashboard" class="w3-link"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
+      </nav>
+    </div>
   </div>
 
   <div class="w3-sidebar-foot">
+    <a href="/dashboard" class="w3-link">
+      <i class="fa fa-gauge"></i><span>Dashboard</span>
+    </a>
+    <a href="/profile" class="w3-link">
+      <i class="fa fa-user"></i><span>Profile</span>
+    </a>
     <a href="#" id="logoutBtnSidebar" class="w3-link" style="padding:7px 8px">
       <i class="fa fa-right-from-bracket"></i><span>Logout</span>
     </a>
@@ -992,12 +797,12 @@
     </button>
 
     <a href="/dashboard" class="w3-app-logo d-lg-none">
-      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="MSIT Home Builder">
-      <span>MSIT Builder</span>
+      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
+      <span>Doctor Booking</span>
     </a>
 
     <strong class="w3-title ms-1 d-none d-lg-inline">
-      @yield('title','MSIT Home Builder')
+      @yield('title','Doctor Booking')
     </strong>
 
     <div class="ms-auto d-flex align-items-center gap-2">
@@ -1011,7 +816,7 @@
 
       <button
         type="button"
-        class="w3-icon-btn w3-notify-btn"
+        class="w3-icon-btn w3-notify-btn d-none"
         id="alertsMenu"
         data-bs-toggle="offcanvas"
         data-bs-target="#notificationDrawer"
@@ -1032,7 +837,7 @@
   </div>
 </header>
 
-<div class="offcanvas offcanvas-end w3-notif-drawer" tabindex="-1" id="notificationDrawer" aria-labelledby="notificationDrawerLabel">
+<div class="offcanvas offcanvas-end w3-notif-drawer d-none" tabindex="-1" id="notificationDrawer" aria-labelledby="notificationDrawerLabel">
   <div class="offcanvas-header">
     <div>
       <h5 class="offcanvas-title" id="notificationDrawerLabel">Notifications</h5>
@@ -1298,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderProfileMiniFromPayload(payload){
-    const block = payload?.data || payload || {};
+    const block = payload?.user || payload?.data || payload || {};
     setHeaderProfile(block.image || '', block.avatar_text || '');
   }
 
@@ -1322,7 +1127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const API_SIDEBAR = '/api/my/sidebar-menus';
   const API_LOGOUT = '/api/auth/logout';
-  const API_PROFILE_MINI = '/api/profile/mini';
+  const API_PROFILE_MINI = '/api/auth/profile';
   const API_NOTIFICATION_COUNT = '/api/notifications/unread-count';
   const API_NOTIFICATION_DRAWER = '/api/notifications/drawer';
   const API_NOTIFICATION_READ_ALL = '/api/notifications/read-all';
@@ -1466,45 +1271,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadHeaderNotifications(options = {}){
-    const token = getBearerToken();
-    if (!token) return;
-
-    const forceRefresh = !!options.forceRefresh;
-    const skipCachedRender = !!options.skipCachedRender;
-    const cached = readScopedCache(NOTIFICATION_CACHE_PREFIX, token);
-    const cachedPayload = getCachePayload(cached);
-
-    if (cachedPayload && !skipCachedRender) {
-      renderNotificationSnapshot(cachedPayload);
-    }
-
-    if (cachedPayload && !forceRefresh && getCacheAge(cached) <= NOTIFICATION_CACHE_TTL_MS) {
-      return;
-    }
-
-    try{
-      const [countRes, drawerRes] = await Promise.all([
-        fetch(API_NOTIFICATION_COUNT, { headers: notificationHeaders() }),
-        fetch(`${API_NOTIFICATION_DRAWER}?limit=10`, { headers: notificationHeaders() })
-      ]);
-
-      const countJson = await countRes.json().catch(() => ({}));
-      const drawerJson = await drawerRes.json().catch(() => ({}));
-
-      if (countRes.ok && countJson?.success && drawerRes.ok && drawerJson?.success) {
-        const snapshot = {
-          unread_count: countJson.data?.unread_count || 0,
-          items: drawerJson.data?.items || []
-        };
-        writeScopedCache(NOTIFICATION_CACHE_PREFIX, token, snapshot);
-        renderNotificationSnapshot(snapshot);
-      }
-    }catch(e){
-      if (!cachedPayload) {
-        setNotificationBadge(0);
-        renderNotificationDrawer([]);
-      }
-    }
+    setNotificationBadge(0);
+    renderNotificationDrawer([]);
   }
 
   window.loadHeaderNotifications = loadHeaderNotifications;
@@ -1793,6 +1561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     '/scholarship/assign/view':      { section:'ACCOUNTING', header:'Scholarship',    page:'Assign Scholarship',         icon:'fa-solid fa-award',            direct:false },
 
     '/user/manage':                  { section:'USERS',      header:'Users',          page:'Users',                      icon:'fa-solid fa-user-group',       direct:true  },
+    '/user-privileges/manage':       { section:'USERS',      header:'Users',          page:'Assign User Privileges',     icon:'fa-solid fa-user-lock',        direct:true  },
     '/student/all':                  { section:'USERS',      header:'Student',        page:'All Students',               icon:'fa-solid fa-users',            direct:false },
     '/student/register':             { section:'USERS',      header:'Student',        page:'Register',                   icon:'fa-solid fa-user-graduate',    direct:false },
     '/student/promote':              { section:'USERS',      header:'Student',        page:'Promote',                    icon:'fa-solid fa-arrow-up-right-dots', direct:false },
@@ -2061,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const confirm = await Swal.fire({
       title: 'Log out?',
-      text: 'You will be signed out of MSIT Home Builder.',
+      text: 'You will be signed out of Doctor Booking.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, logout',

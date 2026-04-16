@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\API\Concerns\PersistsAdminNotifications;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ use Exception;
 
 class PagePrivilegeController extends Controller
 {
+    use PersistsAdminNotifications;
+
     /**
      * Build a default global privilege key if not provided.
      * Example: module "Fees Collection", action "Collect"
@@ -642,6 +645,22 @@ class PagePrivilegeController extends Controller
                     'ms'       => (int) round((microtime(true) - $t0) * 1000),
                 ]);
 
+                $this->notifyAdmins(
+                    'Page privileges created',
+                    count($created) . ' privilege(s) were created.',
+                    [
+                        'action'    => 'bulk_create',
+                        'module'    => 'page_privilege',
+                        'created'   => array_map(fn ($row) => ['id' => (int) $row->id, 'uuid' => (string) ($row->uuid ?? ''), 'action' => (string) ($row->action ?? '')], $created),
+                        'skipped'   => $skipped,
+                        'errors'    => $errors,
+                        'menu_id'   => (int) $moduleId,
+                        'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                    ],
+                    '/page-privilege/manage',
+                    'page_privilege'
+                );
+
                 return response()->json([
                     'created'          => $created,
                     'skipped_conflict' => $skipped,
@@ -914,6 +933,23 @@ class PagePrivilegeController extends Controller
                 null,
                 (array) $priv,
                 'Single create privilege'
+            );
+
+            $this->notifyAdmins(
+                'Page privilege created',
+                'Privilege "' . (string) ($priv->action ?? 'Unknown') . '" was created.',
+                [
+                    'action'    => 'create',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($priv->uuid ?? ''),
+                        'name' => (string) ($priv->action ?? ''),
+                    ],
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
             );
 
             return response()->json(['privilege' => $priv, 'req_id' => $reqId], 201);
@@ -1201,6 +1237,24 @@ class PagePrivilegeController extends Controller
                 'Update privilege'
             );
 
+            $this->notifyAdmins(
+                'Page privilege updated',
+                'Privilege "' . (string) ($priv->action ?? 'Unknown') . '" was updated.',
+                [
+                    'action'    => 'update',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($priv->uuid ?? ''),
+                        'name' => (string) ($priv->action ?? ''),
+                    ],
+                    'changes'   => $changed,
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
+            );
+
             return response()->json(['privilege' => $priv]);
         } catch (Exception $e) {
             $this->logActivitySafe(
@@ -1445,6 +1499,21 @@ class PagePrivilegeController extends Controller
                 }
             });
 
+            $this->notifyAdmins(
+                'Page privileges updated',
+                count($updated) . ' privilege(s) were updated.',
+                [
+                    'action'    => 'bulk_update',
+                    'module'    => 'page_privilege',
+                    'updated'   => array_map(fn ($row) => ['id' => (int) $row->id, 'uuid' => (string) ($row->uuid ?? ''), 'action' => (string) ($row->action ?? '')], $updated),
+                    'skipped'   => $skipped,
+                    'errors'    => $errors,
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
+            );
+
             return response()->json([
                 'updated'          => $updated,
                 'skipped_conflict' => $skipped,
@@ -1510,6 +1579,24 @@ class PagePrivilegeController extends Controller
                 'Soft delete privilege'
             );
 
+            $this->notifyAdmins(
+                'Page privilege deleted',
+                'Privilege "' . (string) ($fresh->action ?? $priv->action ?? 'Unknown') . '" was deleted.',
+                [
+                    'action'    => 'delete',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($fresh->uuid ?? $priv->uuid ?? ''),
+                        'name' => (string) ($fresh->action ?? $priv->action ?? ''),
+                    ],
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege',
+                'high'
+            );
+
             return response()->json(['message' => 'Privilege soft-deleted']);
         } catch (Exception $e) {
             $this->logActivitySafe(
@@ -1564,6 +1651,23 @@ class PagePrivilegeController extends Controller
                 $this->pickKeys($oldPrivArr, ['deleted_at']),
                 $this->pickKeys((array)$priv, ['deleted_at']),
                 'Restore privilege'
+            );
+
+            $this->notifyAdmins(
+                'Page privilege restored',
+                'Privilege "' . (string) ($priv->action ?? 'Unknown') . '" was restored.',
+                [
+                    'action'    => 'restore',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($priv->uuid ?? ''),
+                        'name' => (string) ($priv->action ?? ''),
+                    ],
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
             );
 
             return response()->json(['privilege' => $priv, 'message' => 'Privilege restored']);
@@ -1699,6 +1803,23 @@ class PagePrivilegeController extends Controller
                 'Archive privilege'
             );
 
+            $this->notifyAdmins(
+                'Page privilege archived',
+                'Privilege "' . (string) ($fresh->action ?? $priv->action ?? 'Unknown') . '" was archived.',
+                [
+                    'action'    => 'archive',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($fresh->uuid ?? $priv->uuid ?? ''),
+                        'name' => (string) ($fresh->action ?? $priv->action ?? ''),
+                    ],
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
+            );
+
             return response()->json(['message' => 'Privilege archived']);
         } catch (Exception $e) {
             $this->logActivitySafe(
@@ -1770,6 +1891,23 @@ class PagePrivilegeController extends Controller
                 'Unarchive privilege'
             );
 
+            $this->notifyAdmins(
+                'Page privilege unarchived',
+                'Privilege "' . (string) ($fresh->action ?? $priv->action ?? 'Unknown') . '" was unarchived.',
+                [
+                    'action'    => 'unarchive',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($fresh->uuid ?? $priv->uuid ?? ''),
+                        'name' => (string) ($fresh->action ?? $priv->action ?? ''),
+                    ],
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
+            );
+
             return response()->json(['message' => 'Privilege unarchived']);
         } catch (Exception $e) {
             $this->logActivitySafe(
@@ -1826,6 +1964,24 @@ class PagePrivilegeController extends Controller
                 $oldPrivArr,
                 null,
                 'Privilege permanently deleted (and related user_privileges removed)'
+            );
+
+            $this->notifyAdmins(
+                'Page privilege permanently deleted',
+                'Privilege "' . (string) ($priv->action ?? 'Unknown') . '" was permanently deleted.',
+                [
+                    'action'    => 'force_delete',
+                    'module'    => 'page_privilege',
+                    'privilege' => [
+                        'id'   => (int) $priv->id,
+                        'uuid' => (string) ($priv->uuid ?? ''),
+                        'name' => (string) ($priv->action ?? ''),
+                    ],
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege',
+                'high'
             );
 
             return response()->json(['message' => 'Privilege permanently deleted']);
@@ -1914,6 +2070,19 @@ class PagePrivilegeController extends Controller
                 null,
                 $map,
                 'Reordered privileges (count='.count($ids).')'
+            );
+
+            $this->notifyAdmins(
+                'Page privileges reordered',
+                'Privilege order was updated.',
+                [
+                    'action'    => 'reorder',
+                    'module'    => 'page_privilege',
+                    'order_map' => $map,
+                    'actor_id'  => (int) ($request->attributes->get('auth_tokenable_id') ?? optional($request->user())->id ?? 0),
+                ],
+                '/page-privilege/manage',
+                'page_privilege'
             );
 
             return response()->json(['message' => 'Order updated']);

@@ -1,10 +1,10 @@
 {{-- resources/views/modules/dashboardMenu/createDashboardMenu.blade.php --}}
-@extends('pages.users.layout.structure')
+@extends('pages.layout.structure')
 
 @section('title','Create Dashboard Menu')
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-<link rel="stylesheet" href="{{ asset('assets/css/common/main.css') }}"/>
+<link rel="stylesheet" href="{{ asset('assets/css/main.css') }}"/>
 
 @push('styles')
 <style>

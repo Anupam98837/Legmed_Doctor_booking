@@ -1,10 +1,10 @@
 {{-- resources/views/privileges/createPagePrivilege.blade.php --}}
-@extends('pages.users.layout.structure')
+@extends('pages.layout.structure')
 
 @section('title','Create Page Privilege')
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-<link rel="stylesheet" href="{{ asset('assets/css/common/main.css') }}"/>
+<link rel="stylesheet" href="{{ asset('assets/css/main.css') }}"/>
 
 @push('styles')
 <style>
@@ -22,6 +22,15 @@
   .field-row .grow{flex:1 1 520px;min-width:280px}
   .field-row .btn{height:40px;border-radius:12px}
   .readonly{background:color-mix(in oklab, var(--muted-color) 6%, transparent)!important;cursor:pointer}
+  .priv-list{display:flex;flex-direction:column;gap:12px}
+  .priv-card{border:1px solid var(--line-strong);border-radius:16px;background:var(--surface);overflow:hidden}
+  .priv-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line-soft);background:var(--background-soft)}
+  .priv-card-title{font-weight:700}
+  .priv-grid{padding:14px}
+  .priv-api-actions{display:flex;gap:.75rem;align-items:end;flex-wrap:wrap}
+  .priv-api-actions .grow{flex:1 1 520px;min-width:280px}
+  .priv-remove-btn{min-width:120px}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
   /* Modals */
   .modal-content{border-radius:16px;border:1px solid var(--line-strong);background:var(--surface)}
@@ -120,69 +129,17 @@
       </div>
 
       {{-- Action --}}
-      <div class="col-md-6">
-        <label class="form-label mb-1">Action (unique per module) <span class="req">*</span></label>
-        <select id="action_select" class="form-select">
-          <option value="">Select action…</option>
-          <option value="add">Add</option>
-          <option value="edit">Edit</option>
-          <option value="delete">Delete</option>
-          <option value="view">View</option>
-          <option value="__other">Other…</option>
-        </select>
-        <input id="action_other" class="form-control mt-2 d-none" maxlength="60" placeholder="Custom action, e.g. approve_enquiry">
-      </div>
-
-      {{-- Status --}}
-      <div class="col-md-6">
-        <label class="form-label mb-1">Status</label>
-        <select id="status" class="form-select">
-          <option value="active" selected>Active</option>
-          <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
-        </select>
-      </div>
-
-      {{-- Description --}}
       <div class="col-12">
-        <label class="form-label mb-1">Description</label>
-        <textarea id="description" class="form-control" rows="3" placeholder="Optional description"></textarea>
-      </div>
-
-      {{-- API (via modal) --}}
-      <div class="col-12">
-        <label class="form-label mb-1">API Endpoint / Route <span class="req">*</span></label>
-
-        <div class="field-row">
-          <div class="grow">
-            <input id="api_label" class="form-control readonly" readonly placeholder="Choose API route from controller tree…">
-            <input id="api_pattern" type="hidden" value="">
-            <input id="api_controller" type="hidden" value="">
-            <input id="api_function" type="hidden" value="">
+        <div class="section-head mb-2">
+          <div>
+            <label class="form-label mb-1">Privileges <span class="req">*</span></label>
+            <div class="help">Add one or more privileges for the selected module. Use the plus button to keep adding rows.</div>
           </div>
-          <button id="btnPickApi" type="button" class="btn btn-light">
-            <i class="fa fa-code me-1"></i>Set API
-          </button>
-          <button id="btnClearApi" type="button" class="btn btn-light">
-            <i class="fa fa-xmark me-1"></i>Clear
+          <button id="btnAddPrivilegeRow" type="button" class="btn btn-light">
+            <i class="fa fa-plus me-1"></i>Add Privilege
           </button>
         </div>
-
-        {{-- ✅ HTTP method BELOW API field (auto-selected from modal) --}}
-        <div class="mt-2" style="max-width:360px">
-          <label class="form-label mb-1">HTTP Method</label>
-          <select id="http_method" class="form-select" disabled>
-            <option value="">Auto</option>
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="PATCH">PATCH</option>
-            <option value="DELETE">DELETE</option>
-          </select>
-          <div class="help mt-1">Auto-filled when you select a route from the API modal.</div>
-        </div>
-
-        <div class="help mt-2">Pick from controller tree. Example label: <code>[GET] /api/users</code></div>
+        <div id="privilegeRows" class="priv-list"></div>
       </div>
 
       <div class="col-12 d-flex justify-content-end gap-2 mt-2">
@@ -193,6 +150,84 @@
     </div>
   </div>
 </div>
+
+<template id="privilegeRowTemplate">
+  <div class="priv-card js-priv-row">
+    <div class="priv-card-head">
+      <div>
+        <div class="priv-card-title js-priv-row-title">Privilege 1</div>
+        <div class="help">Action is required. API is optional.</div>
+      </div>
+      <button type="button" class="btn btn-light priv-remove-btn js-remove-priv-row">
+        <i class="fa fa-trash me-1"></i>Remove
+      </button>
+    </div>
+
+    <div class="priv-grid">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label mb-1">Action (unique per module) <span class="req">*</span></label>
+          <select class="form-select js-action-select">
+            <option value="">Select action…</option>
+            <option value="add">Add</option>
+            <option value="edit">Edit</option>
+            <option value="delete">Delete</option>
+            <option value="view">View</option>
+            <option value="__other">Other…</option>
+          </select>
+          <input class="form-control mt-2 d-none js-action-other" maxlength="60" placeholder="Custom action, e.g. approve_enquiry">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label mb-1">Status</label>
+          <select class="form-select js-status">
+            <option value="active" selected>Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label mb-1">Description</label>
+          <textarea class="form-control js-description" rows="3" placeholder="Optional description"></textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label mb-1">API Endpoint / Route</label>
+          <div class="priv-api-actions">
+            <div class="grow">
+              <input class="form-control readonly js-api-label" readonly placeholder="Choose API route from controller tree…">
+              <input type="hidden" class="js-api-pattern" value="">
+              <input type="hidden" class="js-api-controller" value="">
+              <input type="hidden" class="js-api-function" value="">
+            </div>
+            <button type="button" class="btn btn-light js-pick-api">
+              <i class="fa fa-code me-1"></i>Set API
+            </button>
+            <button type="button" class="btn btn-light js-clear-api">
+              <i class="fa fa-xmark me-1"></i>Clear
+            </button>
+          </div>
+
+          <div class="mt-2" style="max-width:360px">
+            <label class="form-label mb-1">HTTP Method</label>
+            <select class="form-select js-http-method" disabled>
+              <option value="">Auto</option>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <div class="help mt-1">Auto-filled when you select a route from the API modal.</div>
+          </div>
+
+          <div class="help mt-2">Optional. Pick from controller tree if this privilege should point to a specific API route.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 {{-- ===================== MODULE PICKER MODAL ===================== --}}
 <div class="modal fade" id="moduleModal" tabindex="-1" aria-hidden="true">
@@ -335,19 +370,9 @@
     moduleLabel: document.getElementById('module_label'),
     pickModule: document.getElementById('btnPickModule'),
     clearModule: document.getElementById('btnClearModule'),
-
-    actionSelect: document.getElementById('action_select'),
-    actionOther: document.getElementById('action_other'),
-    status: document.getElementById('status'),
-    desc: document.getElementById('description'),
-
-    apiLabel: document.getElementById('api_label'),
-    apiPattern: document.getElementById('api_pattern'),
-    httpMethod: document.getElementById('http_method'),
-    apiController: document.getElementById('api_controller'),
-    apiFunction: document.getElementById('api_function'),
-    pickApi: document.getElementById('btnPickApi'),
-    clearApi: document.getElementById('btnClearApi'),
+    rowsWrap: document.getElementById('privilegeRows'),
+    addRow: document.getElementById('btnAddPrivilegeRow'),
+    rowTemplate: document.getElementById('privilegeRowTemplate'),
 
     moduleModalEl: document.getElementById('moduleModal'),
     apiModalEl: document.getElementById('apiModal'),
@@ -383,6 +408,100 @@
     }
     return null;
   };
+
+  let _rowSeq = 0;
+  let _activeApiRowId = null;
+
+  function getPrivilegeRows(){
+    return Array.from(els.rowsWrap.querySelectorAll('.js-priv-row'));
+  }
+
+  function getRowEls(row){
+    return {
+      actionSelect: row.querySelector('.js-action-select'),
+      actionOther: row.querySelector('.js-action-other'),
+      status: row.querySelector('.js-status'),
+      desc: row.querySelector('.js-description'),
+      apiLabel: row.querySelector('.js-api-label'),
+      apiPattern: row.querySelector('.js-api-pattern'),
+      httpMethod: row.querySelector('.js-http-method'),
+      apiController: row.querySelector('.js-api-controller'),
+      apiFunction: row.querySelector('.js-api-function'),
+      rowTitle: row.querySelector('.js-priv-row-title'),
+      removeBtn: row.querySelector('.js-remove-priv-row'),
+    };
+  }
+
+  function setRowActionValue(row, actionStr){
+    const nodes = getRowEls(row);
+    const a = (actionStr || '').trim();
+    if(!a){
+      nodes.actionSelect.value = '';
+      nodes.actionOther.value = '';
+      nodes.actionOther.classList.add('d-none');
+      return;
+    }
+    const builtIn = ['add','edit','delete','view'];
+    if(builtIn.includes(a.toLowerCase())){
+      nodes.actionSelect.value = a.toLowerCase();
+      nodes.actionOther.value = '';
+      nodes.actionOther.classList.add('d-none');
+    }else{
+      nodes.actionSelect.value = '__other';
+      nodes.actionOther.classList.remove('d-none');
+      nodes.actionOther.value = a;
+    }
+  }
+
+  function setRowApiSelection(row, path, method, controllerKey, fnName){
+    const nodes = getRowEls(row);
+    const p = (path || '').trim();
+    const m = (method || '').trim().toUpperCase();
+
+    nodes.apiPattern.value = p;
+    nodes.apiController.value = controllerKey || '';
+    nodes.apiFunction.value = fnName || '';
+    nodes.httpMethod.value = p ? (m || '') : '';
+    nodes.httpMethod.disabled = !p;
+
+    const label = p ? ((m ? `[${m}] ` : '') + p) : '';
+    nodes.apiLabel.value = label;
+
+    if(_activeApiRowId === row.dataset.rowId){
+      els.selectedApiPill.textContent = label || '—';
+    }
+  }
+
+  function createPrivilegeRow(data = {}){
+    const fragment = els.rowTemplate.content.cloneNode(true);
+    const row = fragment.querySelector('.js-priv-row');
+    row.dataset.rowId = String(++_rowSeq);
+    els.rowsWrap.appendChild(row);
+
+    const nodes = getRowEls(row);
+    setRowActionValue(row, data.action || '');
+    nodes.status.value = data.status || 'active';
+    nodes.desc.value = data.description || '';
+    setRowApiSelection(row, data.apiPattern || '', data.httpMethod || '', data.apiController || '', data.apiFunction || '');
+
+    updatePrivilegeRowMeta();
+    return row;
+  }
+
+  function updatePrivilegeRowMeta(){
+    const rows = getPrivilegeRows();
+    rows.forEach((row, idx)=>{
+      const nodes = getRowEls(row);
+      if(nodes.rowTitle) nodes.rowTitle.textContent = `Privilege ${idx + 1}`;
+      if(nodes.removeBtn) nodes.removeBtn.disabled = rows.length === 1 || isEdit;
+    });
+  }
+
+  function resetCreateRows(rows = [{}]){
+    els.rowsWrap.innerHTML = '';
+    rows.forEach(data => createPrivilegeRow(data));
+    updatePrivilegeRowMeta();
+  }
 
   function pickApiAndMethodFromRecord(r){
     const metaObj = tryParseJson(r?.meta) || {};
@@ -434,17 +553,6 @@
     els.saveTxtTop.textContent = 'Update';
     els.saveTxtBottom.textContent = 'Update';
   }
-
-  /* ===================== ACTION OTHER TOGGLE ===================== */
-  els.actionSelect.addEventListener('change', ()=>{
-    if(els.actionSelect.value === '__other'){
-      els.actionOther.classList.remove('d-none');
-      els.actionOther.focus();
-    }else{
-      els.actionOther.classList.add('d-none');
-      els.actionOther.value='';
-    }
-  });
 
   /* ===================== MODULE MODAL + TREE ===================== */
   let _menuLoaded = false;
@@ -717,22 +825,6 @@
     return root;
   }
 
-  function setApiSelection(path, method, controllerKey, fnName){
-    const p = (path || '').trim();
-    const m = (method || '').trim().toUpperCase();
-
-    els.apiPattern.value = p;
-    els.apiController.value = controllerKey || '';
-    els.apiFunction.value = fnName || '';
-
-    els.httpMethod.value = p ? (m || '') : '';
-    els.httpMethod.disabled = !p;
-
-    const label = (m ? `[${m}] ` : '') + p;
-    els.apiLabel.value = p ? label : '';
-    els.selectedApiPill.textContent = p ? label : '—';
-  }
-
   function renderApiTree(container, apiControllers){
     container.innerHTML = '';
 
@@ -848,7 +940,8 @@
           selectBtn.className = 'btn btn-primary btn-sm';
           selectBtn.innerHTML = `<i class="fa fa-check me-1"></i>Select`;
           selectBtn.addEventListener('click', ()=>{
-            setApiSelection(path, method, controllerKey, fnName);
+            const row = getPrivilegeRows().find(x => x.dataset.rowId === _activeApiRowId) || getPrivilegeRows()[0];
+            if(row) setRowApiSelection(row, path, method, controllerKey, fnName);
             apiModal.hide();
           });
 
@@ -890,22 +983,24 @@
     }
   }
 
-  function openApiPicker(){
+  function openApiPickerForRow(row){
+    if(!row) return;
+    _activeApiRowId = row.dataset.rowId || null;
+    const nodes = getRowEls(row);
     els.apiSearch.value = '';
-    els.selectedApiPill.textContent = els.apiLabel.value || '—';
+    els.selectedApiPill.textContent = nodes.apiLabel.value || '—';
     apiModal.show();
     loadApiMap(false).catch(e=> err(e.message || 'Failed to load API map'));
   }
-
-  els.pickApi.addEventListener('click', openApiPicker);
-  els.apiLabel.addEventListener('click', openApiPicker);
 
   els.reloadApi.addEventListener('click', ()=>{
     loadApiMap(true).then(()=> ok('API map reloaded')).catch(e=> err(e.message||'Reload failed'));
   });
 
-  els.clearApiPick.addEventListener('click', ()=> setApiSelection('', '', '', ''));
-  els.clearApi.addEventListener('click', ()=> setApiSelection('', '', '', ''));
+  els.clearApiPick.addEventListener('click', ()=>{
+    const row = getPrivilegeRows().find(x => x.dataset.rowId === _activeApiRowId) || getPrivilegeRows()[0];
+    if(row) setRowApiSelection(row, '', '', '', '');
+  });
 
   let _apiSearchT = null;
   els.apiSearch.addEventListener('input', ()=>{
@@ -914,51 +1009,14 @@
   });
 
   /* ===================== PREFILL FOR EDIT ===================== */
-  function setActionValue(actionStr){
-    const a = (actionStr || '').trim();
-    if(!a){
-      els.actionSelect.value = '';
-      els.actionOther.value = '';
-      els.actionOther.classList.add('d-none');
-      return;
-    }
-    const builtIn = ['add','edit','delete','view'];
-    if(builtIn.includes(a.toLowerCase())){
-      els.actionSelect.value = a.toLowerCase();
-      els.actionOther.value = '';
-      els.actionOther.classList.add('d-none');
-    }else{
-      els.actionSelect.value = '__other';
-      els.actionOther.classList.remove('d-none');
-      els.actionOther.value = a;
-    }
-  }
   function safeJson(v){
-  if(!v) return null;
-  if(typeof v === 'object') return v;
-  if(typeof v === 'string'){
-    try { return JSON.parse(v); } catch(e){ return null; }
+    if(!v) return null;
+    if(typeof v === 'object') return v;
+    if(typeof v === 'string'){
+      try { return JSON.parse(v); } catch(e){ return null; }
+    }
+    return null;
   }
-  return null;
-}
-
-function getHttpMethodFromPrivilege(p){
-  const meta = safeJson(p?.meta);
-  const m = meta?.http_method || meta?.method || p?.http_method || '';
-  return String(m || '').trim().toUpperCase();
-}
-
-function getFirstApiFromPrivilege(p){
-  // assigned_apis might be array, stringified array, or single string
-  const apisRaw = p?.assigned_apis ?? p?.api ?? p?.api_pattern ?? '';
-  if(Array.isArray(apisRaw)) return (apisRaw[0] || '').trim();
-
-  const apisObj = safeJson(apisRaw);
-  if(Array.isArray(apisObj)) return (apisObj[0] || '').trim();
-
-  return String(apisRaw || '').trim();
-}
-
 
   async function prefillEditMode(key){
     try{
@@ -983,29 +1041,31 @@ function getFirstApiFromPrivilege(p){
         els.selectedModulePill.textContent = els.moduleLabel.value || '—';
       }
 
-      // action / status / desc
-      setActionValue(r.action || '');
-      els.status.value = (r.status || 'active');
-      els.desc.value = (r.description || '');
-
-      // api + method
+      resetCreateRows([{}]);
+      const row = getPrivilegeRows()[0];
       const { api, method } = pickApiAndMethodFromRecord(r);
-      setApiSelection(api || '', method || '', r.api_controller || '', r.api_function || '');
+      setRowActionValue(row, r.action || '');
+      const rowEls = getRowEls(row);
+      rowEls.status.value = (r.status || 'active');
+      rowEls.desc.value = (r.description || '');
+      setRowApiSelection(row, api || '', method || '', r.api_controller || '', r.api_function || '');
 
       // snapshot for reset
       _editSnapshot = {
         privKey: els.privKey.value,
         moduleId: els.moduleId.value,
         moduleLabel: els.moduleLabel.value,
-        actionSelect: els.actionSelect.value,
-        actionOther: els.actionOther.value,
-        status: els.status.value,
-        desc: els.desc.value,
-        apiPattern: els.apiPattern.value,
-        apiLabel: els.apiLabel.value,
-        httpMethod: els.httpMethod.value,
-        apiController: els.apiController.value,
-        apiFunction: els.apiFunction.value
+        rows: [{
+          actionSelect: rowEls.actionSelect.value,
+          actionOther: rowEls.actionOther.value,
+          status: rowEls.status.value,
+          desc: rowEls.desc.value,
+          apiPattern: rowEls.apiPattern.value,
+          apiLabel: rowEls.apiLabel.value,
+          httpMethod: rowEls.httpMethod.value,
+          apiController: rowEls.apiController.value,
+          apiFunction: rowEls.apiFunction.value
+        }]
       };
 
       ok('Loaded privilege for edit');
@@ -1017,45 +1077,103 @@ function getFirstApiFromPrivilege(p){
   }
 
   /* ===================== SAVE (CREATE OR UPDATE) ===================== */
-  function getFinalAction(){
-    const sel = (els.actionSelect.value || '').trim();
+  function getFinalAction(row){
+    const nodes = getRowEls(row);
+    const sel = (nodes.actionSelect.value || '').trim();
     if(!sel) return { ok:false, msg:'Please select an action.' };
     if(sel === '__other'){
-      const custom = (els.actionOther.value || '').trim();
+      const custom = (nodes.actionOther.value || '').trim();
       if(!custom) return { ok:false, msg:'Please type a custom action.' };
       return { ok:true, value: custom };
     }
     return { ok:true, value: sel };
   }
 
+  function rowHasAnyValue(row){
+    const nodes = getRowEls(row);
+    return !!(
+      (nodes.actionSelect.value || '').trim() ||
+      (nodes.actionOther.value || '').trim() ||
+      (nodes.desc.value || '').trim() ||
+      (nodes.apiPattern.value || '').trim()
+    );
+  }
+
+  function buildRowPayload(row, index){
+    const nodes = getRowEls(row);
+    const actionInfo = getFinalAction(row);
+
+    if(!actionInfo.ok){
+      if(rowHasAnyValue(row) || getPrivilegeRows().length === 1){
+        return { ok:false, msg:`Privilege ${index + 1}: ${actionInfo.msg}` };
+      }
+      return { ok:true, skip:true };
+    }
+
+    const payload = {
+      action: actionInfo.value,
+      description: (nodes.desc.value || '').trim() || null,
+      status: (nodes.status.value || 'active')
+    };
+
+    const api = (nodes.apiPattern.value || '').trim();
+    const method = (nodes.httpMethod.value || '').trim().toUpperCase();
+
+    if(api){
+      payload.assigned_apis = [api];
+    }
+    if(api && method){
+      payload.meta = { http_method: method };
+    }
+
+    return {
+      ok:true,
+      payload,
+      summary: {
+        action: actionInfo.value,
+        apiLabel: nodes.apiLabel.value || api || 'Not set'
+      }
+    };
+  }
+
   async function savePrivilege(){
     const moduleId = (els.moduleId.value || '').trim();
     if(!moduleId) return Swal.fire('Module required','Please choose a module first.','info');
 
-    const a = getFinalAction();
-    if(!a.ok) return Swal.fire('Action required', a.msg, 'info');
-
-    const api = (els.apiPattern.value || '').trim();
-    if(!api) return Swal.fire('API required','Please set API endpoint / route.','info');
-
-    const method = (els.httpMethod.value || '').trim().toUpperCase();
-
-    const payload = {
-      dashboard_menu_id: moduleId,
-      action: a.value,
-      description: (els.desc.value || '').trim() || null,
-      assigned_apis: [api],
-      meta: method ? { http_method: method } : null,
-      status: (els.status.value || 'active')
-    };
-
     const isNowEdit = isEdit && !!(els.privKey.value || editKey);
     const keyToUse = (els.privKey.value || editKey || '').trim();
+    const rows = getPrivilegeRows();
+    const builtRows = [];
+
+    for(let idx = 0; idx < rows.length; idx++){
+      const built = buildRowPayload(rows[idx], idx);
+      if(!built.ok){
+        return Swal.fire('Action required', built.msg, 'info');
+      }
+      if(!built.skip){
+        builtRows.push(built);
+      }
+    }
+
+    if(!builtRows.length){
+      return Swal.fire('Privilege required', 'Please add at least one privilege row with an action.', 'info');
+    }
+
+    const payload = isNowEdit
+      ? Object.assign({ dashboard_menu_id: moduleId }, builtRows[0].payload)
+      : {
+          dashboard_menu_id: moduleId,
+          privileges: builtRows.map(item => item.payload)
+        };
+
+    const previewHtml = builtRows.slice(0, 4).map((item, idx)=>
+      `${idx + 1}. <b>${esc(item.summary.action)}</b> <span style="opacity:.7">(${esc(item.summary.apiLabel)})</span>`
+    ).join('<br>');
 
     const {isConfirmed} = await Swal.fire({
       icon:'question',
-      title: isNowEdit ? 'Update page privilege?' : 'Create page privilege?',
-      html:`Module: <b>${esc(els.moduleLabel.value||'-')}</b><br>Action: <b>${esc(a.value)}</b><br>API: <b>${esc(els.apiLabel.value||api)}</b>`,
+      title: isNowEdit ? 'Update page privilege?' : `Create ${builtRows.length} page privilege${builtRows.length === 1 ? '' : 's'}?`,
+      html:`Module: <b>${esc(els.moduleLabel.value||'-')}</b><br>${previewHtml}${builtRows.length > 4 ? `<br>...and ${builtRows.length - 4} more` : ''}`,
       showCancelButton:true,
       confirmButtonText: isNowEdit ? 'Update' : 'Create'
     });
@@ -1101,11 +1219,11 @@ function getFirstApiFromPrivilege(p){
         j = await res.json().catch(()=>({}));
         if(!res.ok) throw new Error(j?.message || 'Create failed');
 
-        ok('Privilege created');
+        ok('Privileges created');
         Swal.fire({
           icon:'success',
           title:'Created!',
-          text:'Page privilege created successfully.',
+          text:`${builtRows.length} page privilege${builtRows.length === 1 ? '' : 's'} created successfully.`,
           confirmButtonText:'Go to Manage'
         }).then(()=> { location.href = '/page-privilege/manage'; });
       }
@@ -1125,26 +1243,24 @@ function getFirstApiFromPrivilege(p){
       els.moduleId.value = _editSnapshot.moduleId || '';
       els.moduleLabel.value = _editSnapshot.moduleLabel || '';
       els.selectedModulePill.textContent = els.moduleLabel.value || '—';
-
-      els.actionSelect.value = _editSnapshot.actionSelect || '';
-      els.actionOther.value = _editSnapshot.actionOther || '';
-      if(els.actionSelect.value === '__other'){
-        els.actionOther.classList.remove('d-none');
-      }else{
-        els.actionOther.classList.add('d-none');
+      resetCreateRows(_editSnapshot.rows || [{}]);
+      const row = getPrivilegeRows()[0];
+      if(row){
+        const rowEls = getRowEls(row);
+        rowEls.actionSelect.value = _editSnapshot.rows?.[0]?.actionSelect || '';
+        rowEls.actionOther.value = _editSnapshot.rows?.[0]?.actionOther || '';
+        rowEls.status.value = _editSnapshot.rows?.[0]?.status || 'active';
+        rowEls.desc.value = _editSnapshot.rows?.[0]?.desc || '';
+        if(rowEls.actionSelect.value === '__other') rowEls.actionOther.classList.remove('d-none');
+        else rowEls.actionOther.classList.add('d-none');
+        setRowApiSelection(
+          row,
+          _editSnapshot.rows?.[0]?.apiPattern || '',
+          _editSnapshot.rows?.[0]?.httpMethod || '',
+          _editSnapshot.rows?.[0]?.apiController || '',
+          _editSnapshot.rows?.[0]?.apiFunction || ''
+        );
       }
-
-      els.status.value = _editSnapshot.status || 'active';
-      els.desc.value = _editSnapshot.desc || '';
-
-      els.apiPattern.value = _editSnapshot.apiPattern || '';
-      els.apiLabel.value = _editSnapshot.apiLabel || '';
-      els.httpMethod.value = _editSnapshot.httpMethod || '';
-      els.httpMethod.disabled = !els.apiPattern.value;
-
-      els.apiController.value = _editSnapshot.apiController || '';
-      els.apiFunction.value = _editSnapshot.apiFunction || '';
-      els.selectedApiPill.textContent = els.apiLabel.value || '—';
       ok('Reverted changes');
       return;
     }
@@ -1153,19 +1269,48 @@ function getFirstApiFromPrivilege(p){
     els.moduleId.value = '';
     els.moduleLabel.value = '';
     els.selectedModulePill.textContent = '—';
-
-    els.actionSelect.value = '';
-    els.actionOther.value = '';
-    els.actionOther.classList.add('d-none');
-
-    els.status.value = 'active';
-    els.desc.value = '';
-
-    setApiSelection('', '', '', '');
+    resetCreateRows([{}]);
+    els.selectedApiPill.textContent = '—';
   }
 
-  // init default method disabled
-  els.httpMethod.disabled = true;
+  els.rowsWrap.addEventListener('change', (e)=>{
+    if(e.target.matches('.js-action-select')){
+      const row = e.target.closest('.js-priv-row');
+      const nodes = getRowEls(row);
+      if(e.target.value === '__other'){
+        nodes.actionOther.classList.remove('d-none');
+        nodes.actionOther.focus();
+      }else{
+        nodes.actionOther.classList.add('d-none');
+        nodes.actionOther.value = '';
+      }
+    }
+  });
+
+  els.rowsWrap.addEventListener('click', (e)=>{
+    const row = e.target.closest('.js-priv-row');
+    if(!row) return;
+
+    if(e.target.closest('.js-pick-api') || e.target.classList.contains('js-api-label')){
+      openApiPickerForRow(row);
+      return;
+    }
+
+    if(e.target.closest('.js-clear-api')){
+      setRowApiSelection(row, '', '', '', '');
+      return;
+    }
+
+    if(e.target.closest('.js-remove-priv-row')){
+      if(getPrivilegeRows().length === 1 || isEdit) return;
+      row.remove();
+      updatePrivilegeRowMeta();
+    }
+  });
+
+  els.addRow.addEventListener('click', ()=>{
+    createPrivilegeRow({});
+  });
 
   els.reset.addEventListener('click', resetForm);
   els.back.addEventListener('click', ()=> location.href = '/page-privilege/manage');
@@ -1174,7 +1319,9 @@ function getFirstApiFromPrivilege(p){
 
   // ✅ init
   setModeUI();
+  resetCreateRows([{}]);
   if(isEdit){
+    els.addRow.classList.add('d-none');
     prefillEditMode(editKey);
   }
 

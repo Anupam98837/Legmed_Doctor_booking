@@ -1,4 +1,6 @@
 {{-- resources/views/users/assignRolePrivileges.blade.php --}}
+@extends('pages.layout.structure')
+@section('title', 'Assign Role Privileges')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
@@ -261,6 +263,7 @@
 }
 </style>
 @endpush
+@section('content')
 
 <div class="ap-wrap arp-scope">
   {{-- Header Panel --}}
@@ -379,6 +382,7 @@
     </div>
   </div>
 </div>
+@endsection
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>

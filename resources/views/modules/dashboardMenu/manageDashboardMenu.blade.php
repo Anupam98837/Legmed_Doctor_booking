@@ -1,4 +1,6 @@
 {{-- resources/views/modules/dashboardMenu/manageDashboardMenu.blade.php --}}
+@extends('pages.layout.structure')
+@section('title', 'Manage Dashboard Menu')
 
 @php
   $dmUid = 'dm_' . \Illuminate\Support\Str::random(8);
@@ -311,6 +313,7 @@
     }
   </style>
 @endpush
+@section('content')
   <div id="{{ $dmUid }}"
        class="mdm-wrap"
        data-create-url="{{ $dmCreateUrl }}"
@@ -543,6 +546,7 @@
       </div>
     </div>
   </div>
+@endsection
 
 @push('scripts')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

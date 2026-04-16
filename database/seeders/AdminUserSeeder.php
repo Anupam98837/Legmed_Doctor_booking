@@ -14,7 +14,7 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = 'admin@example.com';
+        $email = 'admin@gmail.com';
 
         $existingUser = DB::table('users')->where('email', $email)->first();
 
@@ -29,7 +29,7 @@ class AdminUserSeeder extends Seeder
                     'alternative_phone_number' => null,
                     'whatsapp_number' => '9999999999',
                     'email_verified_at' => now(),
-                    'password' => Hash::make('Admin@123'),
+                    'password' => Hash::make('admin@123'),
                     'image' => null,
                     'address' => 'System Administrator',
                     'role' => 'admin',
@@ -59,7 +59,7 @@ class AdminUserSeeder extends Seeder
             'alternative_phone_number' => null,
             'whatsapp_number' => '9999999999',
             'email_verified_at' => now(),
-            'password' => Hash::make('Admin@123'),
+            'password' => Hash::make('admin@123'),
             'image' => null,
             'address' => 'System Administrator',
             'role' => 'admin',

@@ -1,4 +1,6 @@
 {{-- resources/views/privileges/managePrivilege.blade.php --}}
+@extends('pages.layout.structure')
+@section('title', 'Manage Page Privileges')
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
@@ -206,6 +208,7 @@ html.theme-dark .mpriv-scope .priv-accordion .list-group-item{
 }
 </style>
 @endpush
+@section('content')
 
 <div class="cm-wrap mpriv-scope">
 
@@ -458,6 +461,7 @@ html.theme-dark .mpriv-scope .priv-accordion .list-group-item{
     <div id="errMsg" class="toast-body">Something went wrong</div><button class="btn-close btn-close-white m-auto me-2" data-bs-dismiss="toast"></button>
   </div></div>
 </div>
+@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -1018,30 +1022,30 @@ html.theme-dark .mpriv-scope .priv-accordion .list-group-item{
           const { value: apiVal } = await Swal.fire({
             title: 'API endpoint / route',
             input: 'text',
-            inputLabel: 'Required (optional prefix: GET /api/...)',
+            inputLabel: 'Optional (you can include a prefix like GET /api/...)',
             inputPlaceholder: 'e.g. GET /api/users or users.index',
             inputAttributes: { maxlength: 255 },
-            showCancelButton: true,
-            inputValidator: (value)=>{
-              if(!value || !value.trim()) return 'API endpoint / route is required';
-            }
+            showCancelButton: true
           });
-          if(!apiVal) return;
+          if(apiVal === undefined) return;
 
-          const parsed = parseApiInput(apiVal.trim());
-          if(!parsed.api){
-            return Swal.fire('API required','Please enter a valid API endpoint / route.','info');
-          }
+          const parsed = parseApiInput((apiVal || '').trim());
 
           addBtn.disabled = true;
           try{
             const payload = {
               dashboard_menu_id: moduleIdentifier,      // ✅ FIX
               action: actionStr,
-              description: null,
-              assigned_apis: [parsed.api],              // ✅ FIX
-              meta: parsed.method ? { http_method: parsed.method } : null
+              description: null
             };
+
+            if(parsed.api){
+              payload.assigned_apis = [parsed.api];
+            }
+
+            if(parsed.api && parsed.method){
+              payload.meta = { http_method: parsed.method };
+            }
 
             const res = await fetch('/api/privileges', {
               method:'POST',
@@ -1510,11 +1514,6 @@ html.theme-dark .mpriv-scope .priv-accordion .list-group-item{
         return Swal.fire('No changes','Nothing to save or delete','info');
       }
 
-      const missingApi = payloads.some(p => !p.api_raw);
-      if(missingApi){
-        return Swal.fire('API required','Every privilege row must have an API endpoint / route.','info');
-      }
-
       const {isConfirmed} = await Swal.fire({
         icon:'question',
         title:'Apply privilege changes?',
@@ -1549,17 +1548,20 @@ html.theme-dark .mpriv-scope .priv-accordion .list-group-item{
         const ops = payloads.map(p => {
           const parsed = parseApiInput(p.api_raw);
           const apiFinal = (parsed.api || '').trim();
-          if(!apiFinal){
-            return Promise.resolve({ err: new Error('API missing') });
-          }
 
           const body = {
             dashboard_menu_id: p.dashboard_menu_id,           // ✅ FIX
             action: p.action,
-            description: p.description || null,
-            assigned_apis: [apiFinal],                        // ✅ FIX
-            meta: parsed.method ? { http_method: parsed.method } : null
+            description: p.description || null
           };
+
+          if(apiFinal){
+            body.assigned_apis = [apiFinal];
+          }
+
+          if(apiFinal && parsed.method){
+            body.meta = { http_method: parsed.method };
+          }
 
           if(p.id){
             const url = `/api/privileges/${encodeURIComponent(p.id)}`;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\API\Concerns\PersistsAdminNotifications;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,8 @@ use Exception;
 
 class DashboardMenuController extends Controller
 {
+    use PersistsAdminNotifications;
+
     /**
      * Normalize actor information from request (compatible with previous pattern)
      */
@@ -486,6 +489,24 @@ class DashboardMenuController extends Controller
                     $snapshot,
                     'Created dashboard menu item'
                 );
+
+                $this->notifyAdmins(
+                    'Dashboard menu created',
+                    'A dashboard menu item "' . (string) ($module->name ?? 'Untitled') . '" was created.',
+                    [
+                        'action' => 'create',
+                        'module' => 'dashboard_menu',
+                        'menu'   => [
+                            'id'   => (int) $module->id,
+                            'uuid' => (string) ($module->uuid ?? ''),
+                            'name' => (string) ($module->name ?? ''),
+                            'href' => (string) ($module->href ?? ''),
+                        ],
+                        'actor'  => $actor,
+                    ],
+                    '/dashboard-menu/manage',
+                    'dashboard_menu'
+                );
             }
 
             // normalize href for response
@@ -673,6 +694,24 @@ class DashboardMenuController extends Controller
                     $newValues,
                     empty($changedFields) ? 'Update called but no field-level change detected' : 'Updated dashboard menu item'
                 );
+
+                $this->notifyAdmins(
+                    'Dashboard menu updated',
+                    'Dashboard menu "' . (string) ($module->name ?? 'Untitled') . '" was updated.',
+                    [
+                        'action' => 'update',
+                        'module' => 'dashboard_menu',
+                        'menu'   => [
+                            'id'   => (int) $module->id,
+                            'uuid' => (string) ($module->uuid ?? ''),
+                            'name' => (string) ($module->name ?? ''),
+                        ],
+                        'changes' => $changedFields,
+                        'actor'   => $this->actor($request),
+                    ],
+                    '/dashboard-menu/manage',
+                    'dashboard_menu'
+                );
             }
 
             // normalize href for response
@@ -721,6 +760,23 @@ class DashboardMenuController extends Controller
                     $newValues,
                     'Archived dashboard menu item'
                 );
+
+                $this->notifyAdmins(
+                    'Dashboard menu archived',
+                    'Dashboard menu "' . (string) ($fresh->name ?? $module->name ?? 'Untitled') . '" was archived.',
+                    [
+                        'action' => 'archive',
+                        'module' => 'dashboard_menu',
+                        'menu'   => [
+                            'id'   => (int) $module->id,
+                            'uuid' => (string) ($fresh->uuid ?? $module->uuid ?? ''),
+                            'name' => (string) ($fresh->name ?? $module->name ?? ''),
+                        ],
+                        'actor'  => $this->actor($request),
+                    ],
+                    '/dashboard-menu/manage',
+                    'dashboard_menu'
+                );
             }
 
             return response()->json(['message' => 'Menu item archived']);
@@ -756,6 +812,23 @@ class DashboardMenuController extends Controller
                     $oldValues,
                     $newValues,
                     'Unarchived dashboard menu item'
+                );
+
+                $this->notifyAdmins(
+                    'Dashboard menu restored',
+                    'Dashboard menu "' . (string) ($fresh->name ?? $module->name ?? 'Untitled') . '" was unarchived.',
+                    [
+                        'action' => 'unarchive',
+                        'module' => 'dashboard_menu',
+                        'menu'   => [
+                            'id'   => (int) $module->id,
+                            'uuid' => (string) ($fresh->uuid ?? $module->uuid ?? ''),
+                            'name' => (string) ($fresh->name ?? $module->name ?? ''),
+                        ],
+                        'actor'  => $this->actor($request),
+                    ],
+                    '/dashboard-menu/manage',
+                    'dashboard_menu'
                 );
             }
 
@@ -816,6 +889,24 @@ class DashboardMenuController extends Controller
                     $oldValues,
                     $newValues,
                     'Soft-deleted dashboard menu item (and related page_privilege if present)'
+                );
+
+                $this->notifyAdmins(
+                    'Dashboard menu deleted',
+                    'Dashboard menu "' . (string) ($afterObj->name ?? $module->name ?? 'Untitled') . '" was deleted.',
+                    [
+                        'action' => 'delete',
+                        'module' => 'dashboard_menu',
+                        'menu'   => [
+                            'id'   => (int) $module->id,
+                            'uuid' => (string) ($afterObj->uuid ?? $module->uuid ?? ''),
+                            'name' => (string) ($afterObj->name ?? $module->name ?? ''),
+                        ],
+                        'actor'  => $this->actor($request),
+                    ],
+                    '/dashboard-menu/manage',
+                    'dashboard_menu',
+                    'high'
                 );
             }
 
@@ -878,6 +969,23 @@ class DashboardMenuController extends Controller
                     $newValues,
                     'Restored dashboard menu item (and related page_privilege if present)'
                 );
+
+                $this->notifyAdmins(
+                    'Dashboard menu restored',
+                    'Dashboard menu "' . (string) ($module->name ?? 'Untitled') . '" was restored.',
+                    [
+                        'action' => 'restore',
+                        'module' => 'dashboard_menu',
+                        'menu'   => [
+                            'id'   => (int) $module->id,
+                            'uuid' => (string) ($module->uuid ?? ''),
+                            'name' => (string) ($module->name ?? ''),
+                        ],
+                        'actor'  => $this->actor($request),
+                    ],
+                    '/dashboard-menu/manage',
+                    'dashboard_menu'
+                );
             }
 
             if (isset($module->href)) {
@@ -929,6 +1037,24 @@ class DashboardMenuController extends Controller
                 'Permanently deleted dashboard menu item (and related page_privilege if present)'
             );
 
+            $this->notifyAdmins(
+                'Dashboard menu permanently deleted',
+                'Dashboard menu "' . (string) ($module->name ?? 'Untitled') . '" was permanently deleted.',
+                [
+                    'action' => 'force_delete',
+                    'module' => 'dashboard_menu',
+                    'menu'   => [
+                        'id'   => (int) $module->id,
+                        'uuid' => (string) ($module->uuid ?? ''),
+                        'name' => (string) ($module->name ?? ''),
+                    ],
+                    'actor'  => $this->actor($request),
+                ],
+                '/dashboard-menu/manage',
+                'dashboard_menu',
+                'high'
+            );
+
             return response()->json(['message' => 'Menu item permanently deleted']);
         } catch (Exception $e) {
             return response()->json([
@@ -971,6 +1097,19 @@ class DashboardMenuController extends Controller
                 null,
                 ['ids' => $ids],
                 'Reordered dashboard_menu items'
+            );
+
+            $this->notifyAdmins(
+                'Dashboard menus reordered',
+                'Dashboard menu order was updated.',
+                [
+                    'action' => 'reorder',
+                    'module' => 'dashboard_menu',
+                    'ids'    => array_values(array_map('intval', $ids)),
+                    'actor'  => $this->actor($request),
+                ],
+                '/dashboard-menu/manage',
+                'dashboard_menu'
             );
 
             return response()->json(['message' => 'Order updated']);

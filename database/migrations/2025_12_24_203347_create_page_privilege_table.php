@@ -36,6 +36,8 @@ return new class extends Migration
 
             /* =========================
              *  Assigned APIs
+             *  - Optional for privileges that are only UI/menu level
+             *  - Stored as NULL when no API mapping is provided
              * ========================= */
             $table->json('assigned_apis')->nullable();
             $table->json('meta')->nullable();

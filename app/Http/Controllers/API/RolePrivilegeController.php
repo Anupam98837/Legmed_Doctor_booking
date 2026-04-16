@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\API\Concerns\PersistsAdminNotifications;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,8 @@ use Illuminate\Support\Str;
 
 class RolePrivilegeController extends Controller
 {
+    use PersistsAdminNotifications;
+
     /* =========================
      * Actor helper (who is doing the action)
      * ========================= */
@@ -475,6 +478,22 @@ class RolePrivilegeController extends Controller
                 'Role privileges synced successfully (tree stored).'
             );
 
+            $this->notifyAdmins(
+                'Role privileges synced',
+                'Privileges were synced for role "' . $role . '".',
+                [
+                    'action'    => 'sync',
+                    'module'    => 'role_privileges',
+                    'role'      => $role,
+                    'saved_ids' => $result['saved_ids'],
+                    'added'     => $result['added'],
+                    'removed'   => $result['removed'],
+                    'actor'     => $actor,
+                ],
+                '/role-privileges/manage',
+                'role_privileges'
+            );
+
             return response()->json([
                 'message' => 'Role privileges synced successfully (tree stored).',
                 'role'    => $role,
@@ -600,6 +619,21 @@ class RolePrivilegeController extends Controller
                     'added' => $result['added'],
                 ],
                 'Role privilege(s) assigned (tree stored).'
+            );
+
+            $this->notifyAdmins(
+                'Role privileges assigned',
+                'Privilege assignment was updated for role "' . $role . '".',
+                [
+                    'action'    => 'assign',
+                    'module'    => 'role_privileges',
+                    'role'      => $role,
+                    'saved_ids' => $result['ids'],
+                    'added'     => $result['added'],
+                    'actor'     => $actor,
+                ],
+                '/role-privileges/manage',
+                'role_privileges'
             );
 
             return response()->json([
@@ -754,6 +788,23 @@ class RolePrivilegeController extends Controller
                 $affected ? 'Role privilege unassigned.' : 'Privilege not found for this role (no changes).'
             );
 
+            if ($affected) {
+                $this->notifyAdmins(
+                    'Role privilege unassigned',
+                    'A privilege was removed from role "' . $role . '".',
+                    [
+                        'action'               => 'unassign',
+                        'module'               => 'role_privileges',
+                        'role'                 => $role,
+                        'requested_privilege_id' => (int) $privId,
+                        'after_privilege_ids'  => $tx['after_ids'] ?? [],
+                        'actor'                => $actor,
+                    ],
+                    '/role-privileges/manage',
+                    'role_privileges'
+                );
+            }
+
             return $affected
                 ? response()->json(['message' => 'Role privilege unassigned.', 'role' => $role])
                 : response()->json(['message' => 'Privilege not found for this role.'], 404);
@@ -821,6 +872,21 @@ class RolePrivilegeController extends Controller
                     'Role privileges removed successfully.'
                 );
 
+                $this->notifyAdmins(
+                    'Role privileges removed',
+                    'Stored privileges for role "' . (string) $row->role . '" were removed.',
+                    [
+                        'action'   => 'delete',
+                        'module'   => 'role_privileges',
+                        'role'     => (string) $row->role,
+                        'row_uuid' => (string) $row->uuid,
+                        'actor'    => $actor,
+                    ],
+                    '/role-privileges/manage',
+                    'role_privileges',
+                    'high'
+                );
+
                 return response()->json(['message' => 'Role privileges removed successfully.', 'role' => (string)$row->role]);
             }
 
@@ -843,6 +909,21 @@ class RolePrivilegeController extends Controller
                 ['target_role' => $role, 'row_uuid' => (string)($row->uuid ?? null), 'deleted_at' => $row->deleted_at],
                 ['target_role' => $role, 'row_uuid' => (string)($row->uuid ?? null), 'deleted_at' => $now->toDateTimeString()],
                 'Role privileges removed successfully.'
+            );
+
+            $this->notifyAdmins(
+                'Role privileges removed',
+                'Stored privileges for role "' . $role . '" were removed.',
+                [
+                    'action'   => 'delete',
+                    'module'   => 'role_privileges',
+                    'role'     => $role,
+                    'row_uuid' => (string) ($row->uuid ?? ''),
+                    'actor'    => $actor,
+                ],
+                '/role-privileges/manage',
+                'role_privileges',
+                'high'
             );
 
             return response()->json(['message' => 'Role privileges removed successfully.', 'role' => $role]);

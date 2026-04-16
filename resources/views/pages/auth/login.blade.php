@@ -1,10 +1,10 @@
-{{-- resources/views/auth/login.blade.php (Unzip Examination) --}}
+{{-- resources/views/auth/login.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login — TechnoHere - Netaji Subhas Engineering College</title>
+  <title>Login — Doctor Booking</title>
 
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
@@ -339,13 +339,13 @@
   <section class="ux-left">
     <div class="ux-brand">
       {{-- Put your Unzip Exam logo here --}}
-      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Unzip Examination">
+      <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="Doctor Booking">
     </div>
 
-    <h1 class="ux-title">TechnoHere</h1>
+    <h1 class="ux-title">Doctor Booking</h1>
     <p>
   An Initiative of</p>
-   <h1 class="ux-title2">Netaji Subhas Engineering College</h1>
+   <h1 class="ux-title2">Admin Portal</h1>
 
    
 

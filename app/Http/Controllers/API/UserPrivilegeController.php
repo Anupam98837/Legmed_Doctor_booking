@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\API\Concerns\PersistsAdminNotifications;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,8 @@ use Illuminate\Support\Str;
 
 class UserPrivilegeController extends Controller
 {
+    use PersistsAdminNotifications;
+
     /* =========================
      * Actor helper (who is doing the action)
      * ========================= */
@@ -527,6 +530,23 @@ class UserPrivilegeController extends Controller
                 'Privileges synced successfully (tree stored).'
             );
 
+            $this->notifyAdmins(
+                'User privileges synced',
+                'Privileges were synced for a user account.',
+                [
+                    'action'           => 'sync',
+                    'module'           => 'user_privileges',
+                    'target_user_id'   => (int) $userId,
+                    'target_user_uuid' => $this->getUserUuid($userId),
+                    'saved_ids'        => $result['saved_ids'],
+                    'added'            => $result['added'],
+                    'removed'          => $result['removed'],
+                    'actor'            => $actor,
+                ],
+                '/user/manage',
+                'user_privileges'
+            );
+
             return response()->json([
                 'message'    => 'Privileges synced successfully (tree stored).',
                 'user_uuid'  => $this->getUserUuid($userId),
@@ -660,6 +680,22 @@ class UserPrivilegeController extends Controller
                     'added' => $result['added'],
                 ],
                 'Privilege(s) assigned (tree stored).'
+            );
+
+            $this->notifyAdmins(
+                'User privileges assigned',
+                'Privilege assignment was updated for a user account.',
+                [
+                    'action'           => 'assign',
+                    'module'           => 'user_privileges',
+                    'target_user_id'   => (int) $userId,
+                    'target_user_uuid' => $this->getUserUuid($userId),
+                    'saved_ids'        => $result['ids'],
+                    'added'            => $result['added'],
+                    'actor'            => $actor,
+                ],
+                '/user/manage',
+                'user_privileges'
             );
 
             return response()->json([
@@ -818,6 +854,24 @@ class UserPrivilegeController extends Controller
                 $affected ? 'Privilege unassigned.' : 'Privilege not found for this user (no changes).'
             );
 
+            if ($affected) {
+                $this->notifyAdmins(
+                    'User privilege unassigned',
+                    'A privilege was removed from a user account.',
+                    [
+                        'action'               => 'unassign',
+                        'module'               => 'user_privileges',
+                        'target_user_id'       => (int) $userId,
+                        'target_user_uuid'     => $this->getUserUuid($userId),
+                        'requested_privilege_id' => (int) $privId,
+                        'after_privilege_ids'  => $tx['after_ids'] ?? [],
+                        'actor'                => $actor,
+                    ],
+                    '/user/manage',
+                    'user_privileges'
+                );
+            }
+
             return $affected
                 ? response()->json(['message' => 'Privilege unassigned.', 'user_uuid' => $this->getUserUuid($userId)])
                 : response()->json(['message' => 'Privilege not found for this user.'], 404);
@@ -935,6 +989,22 @@ class UserPrivilegeController extends Controller
                     $newValues,
                     'User privileges removed successfully.'
                 );
+
+                $this->notifyAdmins(
+                    'User privileges removed',
+                    'Stored privilege mapping for a user account was removed.',
+                    [
+                        'action'           => 'delete',
+                        'module'           => 'user_privileges',
+                        'target_user_id'   => (int) $userId,
+                        'target_user_uuid' => $this->getUserUuid($userId),
+                        'row_uuid'         => (string) $row->uuid,
+                        'actor'            => $actor,
+                    ],
+                    '/user/manage',
+                    'user_privileges',
+                    'high'
+                );
             } else {
                 $userId = $this->resolveUserIdFromRequest($data);
                 if (!$userId) return response()->json(['message' => 'user_id or user_uuid (or uuid) is required'], 422);
@@ -997,6 +1067,23 @@ class UserPrivilegeController extends Controller
                     $oldValues,
                     $newValues,
                     'User privileges removed successfully.'
+                );
+
+                $this->notifyAdmins(
+                    'User privileges removed',
+                    'Stored privilege mapping for a user account was removed.',
+                    [
+                        'action'           => 'delete',
+                        'module'           => 'user_privileges',
+                        'target_user_id'   => (int) $userId,
+                        'target_user_uuid' => $this->getUserUuid($userId),
+                        'row_ids'          => $rowIds,
+                        'row_uuids'        => $rowUuids,
+                        'actor'            => $actor,
+                    ],
+                    '/user/manage',
+                    'user_privileges',
+                    'high'
                 );
             }
 
@@ -1344,8 +1431,8 @@ class UserPrivilegeController extends Controller
         'type' => 'App\\Models\\User',
     ];
 
-    // ✅ If admin/director/principal => return "all"
-    if (in_array(strtolower(trim((string) ($actor['role'] ?? ''))), ['admin', 'director', 'principal'], true)) {
+    // ✅ If admin-like role => return "all"
+    if (in_array(strtolower(trim((string) ($actor['role'] ?? ''))), ['admin', 'super_admin', 'director', 'principal'], true)) {
         return response()->json([
             'user_uuid'       => $this->getUserUuid((int) $actor['id']),
             'session_expired' => false,
@@ -1429,14 +1516,12 @@ class UserPrivilegeController extends Controller
         if (!is_array($headerNode)) continue;
 
         $hid = (int) ($headerNode['id'] ?? 0);
-        if ($hid <= 0) continue;
-
-        $hm = $menuById[$hid] ?? null;
+        $hm = $hid > 0 ? ($menuById[$hid] ?? null) : null;
 
         $hOut = [
             'id'   => $hid,
             'type' => 'header',
-            'name' => $hm->name ?? ($headerNode['name'] ?? null),
+            'name' => $hm->name ?? ($headerNode['name'] ?? 'Menu'),
         ];
 
         if ($hm && isset($hm->href)) $hOut['href'] = $this->normalizeHrefForResponse($hm->href);

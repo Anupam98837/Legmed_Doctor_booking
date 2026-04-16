@@ -1,11 +1,11 @@
 {{-- resources/views/users/assignPrivileges.blade.php --}}
-@extends('pages.users.layout.structure')
+@extends('pages.layout.structure')
 
 @section('title','Assign Privileges')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-<link rel="stylesheet" href="{{ asset('assets/css/common/extraStylings.css') }}"/>
+<link rel="stylesheet" href="{{ asset('assets/css/main.css') }}"/>
 
 <style>
 /* ===== Assign Privileges - Professional Edition ===== */
