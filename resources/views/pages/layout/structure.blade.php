@@ -738,15 +738,30 @@
             <a href="/hospital/manage" class="w3-link"><span>Manage Hospital</span></a>
           </div>
         </div>
-        <div class="w3-group">
-          <a href="#" class="w3-link w3-toggle" data-target="sm-department" aria-expanded="false">
-            <i class="fa-solid fa-building"></i><span>Department</span>
-            <i class="fa fa-chevron-down w3-chev"></i>
-          </a>
-          <div id="sm-department" class="w3-submenu" role="group" aria-label="Department submenu">
-            <a href="/departments" class="w3-link"><span>Manage Department</span></a>
-          </div>
-        </div>
+        <a href="/departments" class="w3-link">
+          <i class="fa-solid fa-building"></i><span>Department</span>
+        </a>
+        <a href="/clinics/manage" class="w3-link">
+          <i class="fa-solid fa-clinic-medical"></i><span>Clinics</span>
+        </a>
+        <a href="/specializations/manage" class="w3-link">
+          <i class="fa-solid fa-stethoscope"></i><span>Specializations</span>
+        </a>
+        <a href="/designations/manage" class="w3-link">
+          <i class="fa-solid fa-user-tie"></i><span>Designations</span>
+        </a>
+        <a href="/registration-councils/manage" class="w3-link">
+          <i class="fa-solid fa-id-card"></i><span>Registration Councils</span>
+        </a>
+        <a href="/languages/manage" class="w3-link">
+          <i class="fa-solid fa-language"></i><span>Languages</span>
+        </a>
+        <a href="/services/manage" class="w3-link">
+          <i class="fa-solid fa-briefcase-medical"></i><span>Services</span>
+        </a>
+        <a href="/qualifications/manage" class="w3-link">
+          <i class="fa-solid fa-graduation-cap"></i><span>Qualifications</span>
+        </a>
       </nav>
 
       <div class="w3-nav-section">
@@ -1562,11 +1577,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEFAULT_ROUTE_META = {
     '/hospital/create':             { section:'HOSPITALS',  header:'Hospital',        page:'Create Hospital',            icon:'fa-solid fa-hospital',        direct:false },
     '/hospital/manage':             { section:'HOSPITALS',  header:'Hospital',        page:'Manage Hospital',            icon:'fa-solid fa-hospital',        direct:false },
-    '/departments/create':          { section:'HOSPITALS',  header:'Department',      page:'Create Department',          icon:'fa-solid fa-building',        direct:false },
+    '/clinics/manage':              { section:'HOSPITALS',  header:'Clinic',          page:'Manage Clinics',             icon:'fa-solid fa-clinic-medical',  direct:true  },
+    '/departments/create':          { section:'HOSPITALS',  header:'Department',      page:'Create Department',          icon:'fa-solid fa-building',        direct:true  },
     '/campus/manage':                { section:'ACADEMICS', header:'Campus',          page:'Manage Campus',              icon:'fa-solid fa-building-columns', direct:false },
     '/institutions/manage':          { section:'ACADEMICS', header:'Institution',     page:'Manage Institutions',        icon:'fa-solid fa-university',       direct:false },
-    '/departments':                  { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:false },
-    '/departments/manage':          { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:false },
+    '/departments':                  { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:true  },
+    '/departments/manage':          { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:true  },
+    '/specializations/manage':      { section:'HOSPITALS',  header:'Specialization',  page:'Manage Specializations',     icon:'fa-solid fa-stethoscope',     direct:true  },
+    '/designations/manage':         { section:'HOSPITALS',  header:'Designation',     page:'Manage Designations',        icon:'fa-solid fa-user-tie',        direct:true  },
+    '/registration-councils/manage':{ section:'HOSPITALS',  header:'Registration Council', page:'Manage Registration Councils', icon:'fa-solid fa-id-card',      direct:true  },
+    '/languages/manage':            { section:'HOSPITALS',  header:'Language',        page:'Manage Languages',           icon:'fa-solid fa-language',        direct:true  },
+    '/services/manage':             { section:'HOSPITALS',  header:'Service',         page:'Manage Services',            icon:'fa-solid fa-briefcase-medical', direct:true },
+    '/qualifications/manage':       { section:'HOSPITALS',  header:'Qualification',   page:'Manage Qualifications',      icon:'fa-solid fa-graduation-cap',  direct:true  },
     '/courses/manage':               { section:'ACADEMICS', header:'Course',          page:'Manage Courses',             icon:'fa-solid fa-book-open',        direct:false },
     '/course-type/manage':           { section:'ACADEMICS', header:'Course',          page:'Course Type',                icon:'fa-solid fa-book-open',        direct:false },
     '/affiliation/manage':           { section:'ACADEMICS', header:'Course',          page:'Manage Affiliation',         icon:'fa-solid fa-book-open',        direct:false },

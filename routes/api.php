@@ -4,8 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\DashboardMenuController;
+use App\Http\Controllers\API\ClinicController;
 use App\Http\Controllers\API\HospitalController;
 use App\Http\Controllers\API\PagePrivilegeController;
+use App\Http\Controllers\API\ReferenceMasterController;
 use App\Http\Controllers\API\RolePrivilegeController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\UserPrivilegeController;
@@ -136,6 +138,90 @@ Route::middleware('checkAuth')->group(function () {
         Route::delete('/{identifier}', [HospitalController::class, 'destroy']);
         Route::post('/{identifier}/restore', [HospitalController::class, 'restore']);
         Route::delete('/{identifier}/force', [HospitalController::class, 'forceDelete']);
+    });
+
+    Route::prefix('clinics')->group(function () {
+        Route::get('/', [ClinicController::class, 'index']);
+        Route::get('/all', [ClinicController::class, 'all']);
+        Route::get('/bin', [ClinicController::class, 'bin']);
+        Route::post('/', [ClinicController::class, 'store']);
+        Route::get('/{identifier}', [ClinicController::class, 'show']);
+        Route::match(['put', 'patch'], '/{identifier}', [ClinicController::class, 'update']);
+        Route::delete('/{identifier}', [ClinicController::class, 'destroy']);
+        Route::post('/{identifier}/restore', [ClinicController::class, 'restore']);
+        Route::delete('/{identifier}/force', [ClinicController::class, 'forceDelete']);
+    });
+
+    Route::prefix('specializations')->group(function () {
+        Route::get('/', [ReferenceMasterController::class, 'index'])->defaults('master', 'specializations');
+        Route::get('/all', [ReferenceMasterController::class, 'all'])->defaults('master', 'specializations');
+        Route::get('/bin', [ReferenceMasterController::class, 'bin'])->defaults('master', 'specializations');
+        Route::post('/', [ReferenceMasterController::class, 'store'])->defaults('master', 'specializations');
+        Route::get('/{identifier}', [ReferenceMasterController::class, 'show'])->defaults('master', 'specializations');
+        Route::match(['put', 'patch'], '/{identifier}', [ReferenceMasterController::class, 'update'])->defaults('master', 'specializations');
+        Route::delete('/{identifier}', [ReferenceMasterController::class, 'destroy'])->defaults('master', 'specializations');
+        Route::post('/{identifier}/restore', [ReferenceMasterController::class, 'restore'])->defaults('master', 'specializations');
+        Route::delete('/{identifier}/force', [ReferenceMasterController::class, 'forceDelete'])->defaults('master', 'specializations');
+    });
+
+    Route::prefix('designations')->group(function () {
+        Route::get('/', [ReferenceMasterController::class, 'index'])->defaults('master', 'designations');
+        Route::get('/all', [ReferenceMasterController::class, 'all'])->defaults('master', 'designations');
+        Route::get('/bin', [ReferenceMasterController::class, 'bin'])->defaults('master', 'designations');
+        Route::post('/', [ReferenceMasterController::class, 'store'])->defaults('master', 'designations');
+        Route::get('/{identifier}', [ReferenceMasterController::class, 'show'])->defaults('master', 'designations');
+        Route::match(['put', 'patch'], '/{identifier}', [ReferenceMasterController::class, 'update'])->defaults('master', 'designations');
+        Route::delete('/{identifier}', [ReferenceMasterController::class, 'destroy'])->defaults('master', 'designations');
+        Route::post('/{identifier}/restore', [ReferenceMasterController::class, 'restore'])->defaults('master', 'designations');
+        Route::delete('/{identifier}/force', [ReferenceMasterController::class, 'forceDelete'])->defaults('master', 'designations');
+    });
+
+    Route::prefix('registration-councils')->group(function () {
+        Route::get('/', [ReferenceMasterController::class, 'index'])->defaults('master', 'registration_councils');
+        Route::get('/all', [ReferenceMasterController::class, 'all'])->defaults('master', 'registration_councils');
+        Route::get('/bin', [ReferenceMasterController::class, 'bin'])->defaults('master', 'registration_councils');
+        Route::post('/', [ReferenceMasterController::class, 'store'])->defaults('master', 'registration_councils');
+        Route::get('/{identifier}', [ReferenceMasterController::class, 'show'])->defaults('master', 'registration_councils');
+        Route::match(['put', 'patch'], '/{identifier}', [ReferenceMasterController::class, 'update'])->defaults('master', 'registration_councils');
+        Route::delete('/{identifier}', [ReferenceMasterController::class, 'destroy'])->defaults('master', 'registration_councils');
+        Route::post('/{identifier}/restore', [ReferenceMasterController::class, 'restore'])->defaults('master', 'registration_councils');
+        Route::delete('/{identifier}/force', [ReferenceMasterController::class, 'forceDelete'])->defaults('master', 'registration_councils');
+    });
+
+    Route::prefix('languages')->group(function () {
+        Route::get('/', [ReferenceMasterController::class, 'index'])->defaults('master', 'languages');
+        Route::get('/all', [ReferenceMasterController::class, 'all'])->defaults('master', 'languages');
+        Route::get('/bin', [ReferenceMasterController::class, 'bin'])->defaults('master', 'languages');
+        Route::post('/', [ReferenceMasterController::class, 'store'])->defaults('master', 'languages');
+        Route::get('/{identifier}', [ReferenceMasterController::class, 'show'])->defaults('master', 'languages');
+        Route::match(['put', 'patch'], '/{identifier}', [ReferenceMasterController::class, 'update'])->defaults('master', 'languages');
+        Route::delete('/{identifier}', [ReferenceMasterController::class, 'destroy'])->defaults('master', 'languages');
+        Route::post('/{identifier}/restore', [ReferenceMasterController::class, 'restore'])->defaults('master', 'languages');
+        Route::delete('/{identifier}/force', [ReferenceMasterController::class, 'forceDelete'])->defaults('master', 'languages');
+    });
+
+    Route::prefix('services')->group(function () {
+        Route::get('/', [ReferenceMasterController::class, 'index'])->defaults('master', 'services');
+        Route::get('/all', [ReferenceMasterController::class, 'all'])->defaults('master', 'services');
+        Route::get('/bin', [ReferenceMasterController::class, 'bin'])->defaults('master', 'services');
+        Route::post('/', [ReferenceMasterController::class, 'store'])->defaults('master', 'services');
+        Route::get('/{identifier}', [ReferenceMasterController::class, 'show'])->defaults('master', 'services');
+        Route::match(['put', 'patch'], '/{identifier}', [ReferenceMasterController::class, 'update'])->defaults('master', 'services');
+        Route::delete('/{identifier}', [ReferenceMasterController::class, 'destroy'])->defaults('master', 'services');
+        Route::post('/{identifier}/restore', [ReferenceMasterController::class, 'restore'])->defaults('master', 'services');
+        Route::delete('/{identifier}/force', [ReferenceMasterController::class, 'forceDelete'])->defaults('master', 'services');
+    });
+
+    Route::prefix('qualifications')->group(function () {
+        Route::get('/', [ReferenceMasterController::class, 'index'])->defaults('master', 'qualifications');
+        Route::get('/all', [ReferenceMasterController::class, 'all'])->defaults('master', 'qualifications');
+        Route::get('/bin', [ReferenceMasterController::class, 'bin'])->defaults('master', 'qualifications');
+        Route::post('/', [ReferenceMasterController::class, 'store'])->defaults('master', 'qualifications');
+        Route::get('/{identifier}', [ReferenceMasterController::class, 'show'])->defaults('master', 'qualifications');
+        Route::match(['put', 'patch'], '/{identifier}', [ReferenceMasterController::class, 'update'])->defaults('master', 'qualifications');
+        Route::delete('/{identifier}', [ReferenceMasterController::class, 'destroy'])->defaults('master', 'qualifications');
+        Route::post('/{identifier}/restore', [ReferenceMasterController::class, 'restore'])->defaults('master', 'qualifications');
+        Route::delete('/{identifier}/force', [ReferenceMasterController::class, 'forceDelete'])->defaults('master', 'qualifications');
     });
 
     Route::get('/role/sidebar-menus', [RolePrivilegeController::class, 'sidebarMenusForRole']);
