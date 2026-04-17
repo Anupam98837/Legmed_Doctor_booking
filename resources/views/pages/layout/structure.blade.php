@@ -1577,6 +1577,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEFAULT_ROUTE_META = {
     '/hospital/create':             { section:'HOSPITALS',  header:'Hospital',        page:'Create Hospital',            icon:'fa-solid fa-hospital',        direct:false },
     '/hospital/manage':             { section:'HOSPITALS',  header:'Hospital',        page:'Manage Hospital',            icon:'fa-solid fa-hospital',        direct:false },
+    '/doctor/profile':              { section:'HOSPITALS',  header:'Doctors',         page:'Doctor Profile',             icon:'fa-solid fa-user-doctor',     direct:true  },
     '/clinics/manage':              { section:'HOSPITALS',  header:'Clinic',          page:'Manage Clinics',             icon:'fa-solid fa-clinic-medical',  direct:true  },
     '/departments/create':          { section:'HOSPITALS',  header:'Department',      page:'Create Department',          icon:'fa-solid fa-building',        direct:true  },
     '/campus/manage':                { section:'ACADEMICS', header:'Campus',          page:'Manage Campus',              icon:'fa-solid fa-building-columns', direct:false },
@@ -1702,6 +1703,17 @@ document.addEventListener('DOMContentLoaded', () => {
         pageName: 'Take Exam',
         icon: 'fa-solid fa-file-pen',
         direct: false,
+        href: path,
+      };
+    }
+
+    if (/^\/doctor\/profile\/[^/]+$/.test(path)) {
+      return {
+        section: 'HOSPITALS',
+        headerName: 'Doctors',
+        pageName: 'Doctor Profile',
+        icon: 'fa-solid fa-user-doctor',
+        direct: true,
         href: path,
       };
     }

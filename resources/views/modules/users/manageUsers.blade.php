@@ -1028,6 +1028,10 @@ document.addEventListener('DOMContentLoaded', function(){
   function buildFloatingMenuHtml(user){
     const items = [];
 
+    if (user && user.uuid && state.canView){
+      items.push('<button type="button" class="usr-menu-item" data-action="doctor_profile"><i class="fa fa-user-doctor"></i><span>Doctor Profile</span></button>');
+    }
+
     if (state.canAssignPrivileges){
       items.push('<button type="button" class="usr-menu-item" data-action="assign_privilege"><i class="fa fa-key"></i><span>Assign Privilege</span></button>');
     }
@@ -1853,6 +1857,11 @@ document.addEventListener('DOMContentLoaded', function(){
         if (userUuid) query.set('user_uuid', userUuid);
         if (userId) query.set('user_id', userId);
         window.location.href = '/user-privileges/manage?' + query.toString();
+        return;
+      }
+
+      if (action === 'doctor_profile'){
+        window.location.href = '/doctor/profile/' + encodeURIComponent(userUuid || userId);
         return;
       }
 

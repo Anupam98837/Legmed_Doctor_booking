@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\DashboardMenuController;
 use App\Http\Controllers\API\ClinicController;
+use App\Http\Controllers\API\DoctorProfileController;
 use App\Http\Controllers\API\HospitalController;
 use App\Http\Controllers\API\PagePrivilegeController;
 use App\Http\Controllers\API\ReferenceMasterController;
@@ -150,6 +151,11 @@ Route::middleware('checkAuth')->group(function () {
         Route::delete('/{identifier}', [ClinicController::class, 'destroy']);
         Route::post('/{identifier}/restore', [ClinicController::class, 'restore']);
         Route::delete('/{identifier}/force', [ClinicController::class, 'forceDelete']);
+    });
+
+    Route::prefix('doctors')->group(function () {
+        Route::get('/profile/{userUuid}', [DoctorProfileController::class, 'show']);
+        Route::post('/profile/{userUuid}', [DoctorProfileController::class, 'save']);
     });
 
     Route::prefix('specializations')->group(function () {

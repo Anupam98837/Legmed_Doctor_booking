@@ -24,6 +24,7 @@ Route::view('/departments/create', 'pages.pages.departments.manageDepartments');
 Route::view('/clinics/manage', 'pages.pages.clinics.manageClinics');
 Route::view('/hospital/create', 'pages.pages.hospitals.createHospital');
 Route::view('/hospital/manage', 'pages.pages.hospitals.manageHospitals');
+Route::view('/doctor/profile/{userUuid}', 'pages.pages.doctors.profileDoctor');
 Route::view('/specializations/manage', 'pages.pages.specializations.manageSpecializations');
 Route::view('/designations/manage', 'pages.pages.designations.manageDesignations');
 Route::view('/registration-councils/manage', 'pages.pages.registrationCouncils.manageRegistrationCouncils');
