@@ -2204,7 +2204,7 @@ class UserController extends Controller
             return false;
         }
 
-        $destDir = public_path('UserProfileImage');
+        $destDir = public_path('assets/media/images/UserProfileImage');
         if (!File::isDirectory($destDir)) {
             File::makeDirectory($destDir, 0755, true);
         }
@@ -2214,7 +2214,7 @@ class UserController extends Controller
 
         $uploadedFile->move($destDir, $filename);
 
-        return '/UserProfileImage/' . $filename;
+        return '/assets/media/images/UserProfileImage/' . $filename;
     }
 
     protected function publicImageUrl(?string $value): string
@@ -2240,7 +2240,7 @@ class UserController extends Controller
         $path = $path ?: $url;
         $path = '/' . ltrim($path, '/');
 
-        if (Str::startsWith($path, '/UserProfileImage/')) {
+        if (Str::startsWith($path, '/assets/media/images/UserProfileImage/')) {
             $abs = public_path(ltrim($path, '/'));
             if (File::exists($abs)) {
                 @File::delete($abs);

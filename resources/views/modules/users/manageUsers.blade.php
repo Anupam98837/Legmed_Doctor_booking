@@ -775,11 +775,15 @@ document.addEventListener('DOMContentLoaded', function(){
     role: '',
     canWrite: false,
     canDelete: false,
+    canView: false,
+    canAssignPrivileges: false,
     rows: [],
     filteredRows: [],
     page: 1,
     perPage: 20,
     search: '',
+    permissionsByPath: new Map(),
+    allAccess: false,
     filters: {
       status: 'all',
       role: '',
@@ -914,6 +918,53 @@ document.addEventListener('DOMContentLoaded', function(){
     };
   }
 
+  function normalizePath(path){
+    const raw = String(path || '').trim();
+    if (!raw) return '';
+    try{
+      const u = new URL(raw, window.location.origin);
+      return (u.pathname || '/').replace(/\/+$/, '') || '/';
+    }catch(e){
+      return ('/' + raw.replace(/^\/+/, '')).replace(/\/+$/, '') || '/';
+    }
+  }
+
+  function hasPageAction(path, ...actions){
+    if (state.allAccess) return true;
+    const set = state.permissionsByPath.get(normalizePath(path));
+    if (!set) return false;
+    return actions.some(action => set.has(String(action).toLowerCase()));
+  }
+
+  async function loadPermissions(){
+    state.permissionsByPath = new Map();
+    state.allAccess = false;
+
+    try{
+      const res = await fetch('/api/my/sidebar-menus?with_actions=1', { headers: authHeaders() });
+      const js = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(js.message || 'Failed to load permissions');
+
+      if (js.tree === 'all'){
+        state.allAccess = true;
+        return;
+      }
+
+      (Array.isArray(js.tree) ? js.tree : []).forEach(header => {
+        (Array.isArray(header.children) ? header.children : []).forEach(page => {
+          const href = normalizePath(page.href || '');
+          if (!href) return;
+          state.permissionsByPath.set(
+            href,
+            new Set((Array.isArray(page.actions) ? page.actions : []).map(v => String(v || '').toLowerCase()).filter(Boolean))
+          );
+        });
+      });
+    }catch(e){
+      state.permissionsByPath = new Map();
+    }
+  }
+
   function normalizeRoleToken(v){
     let r = String(v || '').trim().toLowerCase();
     if (!r) return '';
@@ -975,10 +1026,15 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function buildFloatingMenuHtml(user){
-    const items = [
-      '<button type="button" class="usr-menu-item" data-action="assign_privilege"><i class="fa fa-key"></i><span>Assign Privilege</span></button>',
-      '<button type="button" class="usr-menu-item" data-action="view"><i class="fa fa-eye"></i><span>View</span></button>',
-    ];
+    const items = [];
+
+    if (state.canAssignPrivileges){
+      items.push('<button type="button" class="usr-menu-item" data-action="assign_privilege"><i class="fa fa-key"></i><span>Assign Privilege</span></button>');
+    }
+
+    if (state.canView){
+      items.push('<button type="button" class="usr-menu-item" data-action="view"><i class="fa fa-eye"></i><span>View</span></button>');
+    }
 
     if (state.canWrite){
       items.push('<button type="button" class="usr-menu-item" data-action="edit"><i class="fa fa-pen-to-square"></i><span>Edit</span></button>');
@@ -989,6 +1045,10 @@ document.addEventListener('DOMContentLoaded', function(){
     if (state.canDelete){
       items.push('<hr class="dropdown-divider">');
       items.push('<button type="button" class="usr-menu-item text-danger" data-action="delete"><i class="fa fa-trash"></i><span>Delete</span></button>');
+    }
+
+    if (!items.length){
+      items.push('<div class="px-2 py-2 text-muted small">No actions available</div>');
     }
 
     return items.join('');
@@ -1219,11 +1279,21 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     state.role = role;
-    state.canWrite = role === 'admin';
-    state.canDelete = role === 'admin';
+    state.canView = hasPageAction('/user/manage', 'view') || hasPageAction('/users/manage', 'view') || role === 'admin';
+    state.canWrite =
+      hasPageAction('/user/manage', 'create', 'store', 'update', 'edit') ||
+      hasPageAction('/users/manage', 'create', 'store', 'update', 'edit') ||
+      role === 'admin';
+    state.canDelete =
+      hasPageAction('/user/manage', 'delete', 'destroy') ||
+      hasPageAction('/users/manage', 'delete', 'destroy') ||
+      role === 'admin';
+    state.canAssignPrivileges = role === 'admin';
 
     if (state.canWrite && writeControls){
       writeControls.style.display = 'flex';
+    } else if (writeControls){
+      writeControls.style.display = 'none';
     }
   }
 
@@ -1786,7 +1856,7 @@ document.addEventListener('DOMContentLoaded', function(){
         return;
       }
 
-      if (action === 'view') return openViewModal(userId);
+      if (action === 'view' && state.canView) return openViewModal(userId);
       if (action === 'edit') return openEditModal(userId);
       if (action === 'password') return promptPasswordChange(userId, userName);
       if (action === 'cv') return openCvModal(userUuid, userName);
@@ -1841,6 +1911,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   (async function init(){
     bindEvents();
+    await loadPermissions();
     await ensureRole();
     await loadUsers();
   })();

@@ -7,15 +7,31 @@
     <div class="w3-loader-backdrop"></div>
 
     <div class="w3-loader-inner">
-        <div class="w3-loader-logo-wrap">
-            <div class="w3-loader-orbit">
-                <span class="w3-loader-orbit-dot"></span>
-                <span class="w3-loader-orbit-dot"></span>
-                <span class="w3-loader-orbit-dot"></span>
-            </div>
+        <div class="w3-loader-main">
+            <div class="w3-loader-up">
+                <div class="w3-loaders">
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                    <div class="w3-loader-stick"></div>
+                </div>
 
-            <div class="w3-loader-logo-ring">
-                <img src="{{ asset('/assets/media/images/web/logo.png') }}" alt="{{ $appName }}" class="w3-loader-logo">
+                <div class="w3-loaders-b">
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-0"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-1"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-2"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-3"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-4"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-5"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-6"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-7"></div></div>
+                    <div class="w3-loader-a"><div class="w3-ball w3-ball-8"></div></div>
+                </div>
             </div>
         </div>
 
@@ -23,31 +39,21 @@
             <h2>{{ $appName }}</h2>
             <p>Loading your workspace…</p>
         </div>
-
-        <div class="w3-loader-bar">
-            <div class="w3-loader-bar-fill"></div>
-        </div>
-
-        <div class="w3-loader-hint">
-            <i class="fa-regular fa-circle-check me-1"></i>
-            Theme will match your last choice automatically.
-        </div>
     </div>
 </div>
 
 <style>
-/* ================== Global Loading Overlay ================== */
+/* ================== Global Overlay ================== */
 .w3-loader-overlay{
   position: fixed;
   inset: 0;
-  z-index: 2000; /* above sidebar/appbar etc */
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-sans);
-  /* base bg uses CSS vars so dark/light works */
   background:
-    radial-gradient(circle at top, rgba(148,163,255,0.18), transparent 55%),
+    radial-gradient(circle at top, rgba(148,163,255,0.14), transparent 55%),
     linear-gradient(135deg,
       color-mix(in oklab, var(--bg-body, #0b1220) 80%, #020617 20%),
       color-mix(in oklab, var(--bg-body, #0b1220) 90%, #020617 10%)
@@ -55,25 +61,22 @@
   backdrop-filter: blur(14px);
 }
 
-/* extra soft vignette */
 .w3-loader-backdrop{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background:
-    radial-gradient(circle at bottom,
-      rgba(15,23,42,0.7),
-      transparent 55%);
-  opacity:.9;
+    radial-gradient(circle at bottom, rgba(15,23,42,0.7), transparent 55%);
+  opacity: .9;
 }
 
 .w3-loader-inner{
   position: relative;
   z-index: 1;
-  max-width: 360px;
   width: 100%;
-  padding: 24px 22px 18px;
-  border-radius: 20px;
+  max-width: 420px;
+  padding: 28px 22px 22px;
+  border-radius: 22px;
   border: 1px solid var(--line-strong, rgba(148,163,184,0.5));
   background:
     radial-gradient(circle at top left,
@@ -86,140 +89,183 @@
   overflow: hidden;
 }
 
-/* Logo + orbit */
-.w3-loader-logo-wrap{
+/* ================== Loader ================== */
+.w3-loader-main{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.w3-loader-up{
   position: relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom: 14px;
+  width: 240px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.w3-loader-logo-ring{
-  width: 76px;
-  height: 76px;
-  border-radius: 999px;
-  padding: 3px;
-  background:
-    conic-gradient(
-      from 180deg,
-      color-mix(in oklab, var(--primary-color,#6366f1) 80%, #020617 20%),
-      color-mix(in oklab, var(--accent-color,#ec4899) 80%, #020617 20%),
-      color-mix(in oklab, var(--primary-color,#6366f1) 80%, #020617 20%)
-    );
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation: w3-loader-pulse 1.6s ease-in-out infinite;
+.w3-loaders,
+.w3-loaders-b{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.w3-loader-logo{
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--surface,#ffffff);
-  padding: 8px;
-  object-fit: contain;
+.w3-loader-stick{
+  position: absolute;
+  width: 1.15em;
+  height: 13em;
+  border-radius: 50px;
+  background: #e0e0e0;
 }
 
-/* Orbiting dots */
-.w3-loader-orbit{
-  position:absolute;
-  width:110px;
-  height:110px;
-  border-radius:999px;
-  border:1px dashed color-mix(in oklab, var(--accent-color,#ec4899) 35%, transparent);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation: w3-loader-spin 7s linear infinite;
+.w3-loader-stick::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.15em;
+  height: 5em;
+  background: #e0e0e0;
+  border-radius: 50px;
+  border: 1px solid #e2e2e2;
+  box-shadow:
+    inset 5px 5px 15px #d3d2d2ab,
+    inset -5px -5px 15px #e9e9e9ab;
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent 100%);
 }
 
-.w3-loader-orbit-dot{
-  position:absolute;
-  width:9px;
-  height:9px;
-  border-radius:999px;
-  background: color-mix(in oklab, var(--accent-color,#ec4899) 75%, #020617 25%);
-  box-shadow:0 0 0 4px color-mix(in oklab, var(--accent-color,#ec4899) 18%, transparent);
+.w3-loader-stick::before{
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 1.15em;
+  height: 4.5em;
+  background: #e0e0e0;
+  border-radius: 50px;
+  border: 1px solid #e2e2e2;
+  box-shadow:
+    inset 5px 5px 15px #d3d2d2ab,
+    inset -5px -5px 15px #e9e9e9ab;
+  -webkit-mask-image: linear-gradient(to top, black calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to top, black calc(100% - 48px), transparent 100%);
 }
-.w3-loader-orbit-dot:nth-child(1){ top:-4px; left:50%; transform:translateX(-50%); }
-.w3-loader-orbit-dot:nth-child(2){ bottom:-4px; right:10px; }
-.w3-loader-orbit-dot:nth-child(3){ top:18px; left:-2px; }
 
-/* Text */
+.w3-loader-a{
+  position: absolute;
+  width: 1.15em;
+  height: 13em;
+  border-radius: 50px;
+  background: transparent;
+}
+
+.w3-ball{
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 50%;
+  transition: transform 800ms cubic-bezier(1, -0.4, 0, 1.4);
+  background-color: rgba(232, 232, 232, 1);
+  box-shadow:
+    rgba(0, 0, 0, 0.17) 0px -10px 10px 0px inset,
+    rgba(0, 0, 0, 0.15) 0px -15px 15px 0px inset,
+    rgba(0, 0, 0, 0.1) 0px -40px 20px 0px inset,
+    rgba(0, 0, 0, 0.06) 0px 2px 1px,
+    rgba(0, 0, 0, 0.09) 0px 4px 2px,
+    rgba(0, 0, 0, 0.09) 0px 8px 4px,
+    rgba(0, 0, 0, 0.09) 0px 16px 8px,
+    rgba(0, 0, 0, 0.09) 0px 32px 16px,
+    0px -1px 15px -8px rgba(0, 0, 0, 0.09);
+  animation: w3-loader-move 3.63s ease-in-out infinite;
+}
+
+/* Sticks rotation */
+.w3-loader-stick:nth-child(2){ transform: rotate(20deg); }
+.w3-loader-stick:nth-child(3){ transform: rotate(40deg); }
+.w3-loader-stick:nth-child(4){ transform: rotate(60deg); }
+.w3-loader-stick:nth-child(5){ transform: rotate(80deg); }
+.w3-loader-stick:nth-child(6){ transform: rotate(100deg); }
+.w3-loader-stick:nth-child(7){ transform: rotate(120deg); }
+.w3-loader-stick:nth-child(8){ transform: rotate(140deg); }
+.w3-loader-stick:nth-child(9){ transform: rotate(160deg); }
+
+/* Ball tracks rotation */
+.w3-loader-a:nth-child(2){ transform: rotate(20deg); }
+.w3-loader-a:nth-child(3){ transform: rotate(40deg); }
+.w3-loader-a:nth-child(4){ transform: rotate(60deg); }
+.w3-loader-a:nth-child(5){ transform: rotate(80deg); }
+.w3-loader-a:nth-child(6){ transform: rotate(100deg); }
+.w3-loader-a:nth-child(7){ transform: rotate(120deg); }
+.w3-loader-a:nth-child(8){ transform: rotate(140deg); }
+.w3-loader-a:nth-child(9){ transform: rotate(160deg); }
+
+/* Animation delays */
+.w3-ball-1{ animation-delay: 0.2s; }
+.w3-ball-2{ animation-delay: 0.4s; }
+.w3-ball-3{ animation-delay: 0.6s; }
+.w3-ball-4{ animation-delay: 0.8s; }
+.w3-ball-5{ animation-delay: 1s; }
+.w3-ball-6{ animation-delay: 1.2s; }
+.w3-ball-7{ animation-delay: 1.4s; }
+.w3-ball-8{ animation-delay: 1.6s; }
+
+@keyframes w3-loader-move{
+  0%{ transform: translateY(0em); }
+  50%{ transform: translateY(12em); }
+  100%{ transform: translateY(0em); }
+}
+
+/* ================== Text ================== */
 .w3-loader-text h2{
   font-family: var(--font-head);
-  font-size: 1.25rem;
-  margin: 2px 0 4px;
+  font-size: 1.2rem;
+  margin: 0 0 4px;
 }
+
 .w3-loader-text p{
-  margin:0;
+  margin: 0;
   font-size: var(--fs-13, 0.85rem);
-  color: var(--muted-color,#6b7280);
+  color: var(--muted-color, #6b7280);
 }
 
-/* Progress bar */
-.w3-loader-bar{
-  margin-top: 14px;
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--page-hover,#e5e7eb) 70%, transparent);
-  overflow:hidden;
-  position:relative;
-}
-.w3-loader-bar-fill{
-  position:absolute;
-  inset:0;
-  transform-origin:left;
-  background: linear-gradient(90deg,
-    var(--primary-color,#6366f1),
-    var(--accent-color,#ec4899));
-  animation: w3-loader-bar 1.7s ease-in-out infinite;
-}
-
-/* Hint text */
-.w3-loader-hint{
-  margin-top: 10px;
-  font-size: var(--fs-12, 0.8rem);
-  color: var(--muted-color,#6b7280);
-}
-
-/* ================== Animations ================== */
-@keyframes w3-loader-spin{
-  to { transform: rotate(360deg); }
-}
-@keyframes w3-loader-pulse{
-  0%,100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(0,0,0,0.12); }
-  50%{ transform:scale(1.04); box-shadow:0 0 0 10px rgba(0,0,0,0.07); }
-}
-@keyframes w3-loader-bar{
-  0%{ transform:scaleX(0.18); opacity:.5; }
-  40%{ transform:scaleX(0.9); opacity:1; }
-  100%{ transform:scaleX(0.2) translateX(40%); opacity:.6; }
-}
-
-/* ================== Dark mode tweaks ================== */
+/* ================== Dark mode ================== */
 html.theme-dark .w3-loader-overlay{
   background:
-    radial-gradient(circle at top, rgba(56,189,248,0.16), transparent 55%),
-    linear-gradient(135deg,#020617,#020617);
+    radial-gradient(circle at top, rgba(56,189,248,0.14), transparent 55%),
+    linear-gradient(135deg, #020617, #020617);
 }
+
 html.theme-dark .w3-loader-inner{
   background:
     radial-gradient(circle at top left,
-      color-mix(in oklab, var(--t-primary,rgba(59,130,246,0.25)) 85%, transparent),
+      color-mix(in oklab, var(--t-primary, rgba(59,130,246,0.20)) 80%, transparent),
       transparent 60%),
     #020617;
-  color:#e5e7eb;
+  color: #e5e7eb;
   border-color: rgba(148,163,184,0.6);
 }
-html.theme-dark .w3-loader-text p,
-html.theme-dark .w3-loader-hint{
-  color:#9ca3af;
+
+html.theme-dark .w3-loader-text p{
+  color: #9ca3af;
 }
-html.theme-dark .w3-loader-bar{
-  background:#020617;
+
+html.theme-dark .w3-loader-stick{
+  background: #1f2937;
+}
+
+html.theme-dark .w3-loader-stick::after,
+html.theme-dark .w3-loader-stick::before{
+  background: #1f2937;
+  border-color: #334155;
+  box-shadow:
+    inset 5px 5px 15px rgba(2, 6, 23, 0.55),
+    inset -5px -5px 15px rgba(51, 65, 85, 0.35);
+}
+
+html.theme-dark .w3-ball{
+  background-color: #cbd5e1;
 }
 </style>

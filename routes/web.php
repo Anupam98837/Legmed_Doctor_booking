@@ -19,3 +19,7 @@ Route::view('/page-privilege/create', 'modules.privileges.createPagePrivileges')
 
 Route::view('/user-privileges/manage', 'modules.privileges.assignPrivileges');
 Route::view('/role-privileges/manage', 'modules.privileges.assignRolePrivileges');
+Route::view('/departments', 'pages.pages.departments.manageDepartments');
+Route::view('/departments/create', 'pages.pages.departments.manageDepartments');
+Route::view('/hospital/create', 'pages.pages.hospitals.createHospital');
+Route::view('/hospital/manage', 'pages.pages.hospitals.manageHospitals');

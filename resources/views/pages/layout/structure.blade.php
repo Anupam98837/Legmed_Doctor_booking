@@ -724,6 +724,32 @@
     <div id="adminFullMenu" style="display:none">
 
       <div class="w3-nav-section">
+        <div class="w3-section-title"><i class="fa-solid fa-hospital"></i> HOSPITALS</div>
+        <div class="w3-section-rule"></div>
+      </div>
+      <nav class="w3-menu" aria-label="Hospitals">
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-hospital" aria-expanded="false">
+            <i class="fa-solid fa-hospital"></i><span>Hospital</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-hospital" class="w3-submenu" role="group" aria-label="Hospital submenu">
+            <a href="/hospital/create" class="w3-link"><span>Create Hospital</span></a>
+            <a href="/hospital/manage" class="w3-link"><span>Manage Hospital</span></a>
+          </div>
+        </div>
+        <div class="w3-group">
+          <a href="#" class="w3-link w3-toggle" data-target="sm-department" aria-expanded="false">
+            <i class="fa-solid fa-building"></i><span>Department</span>
+            <i class="fa fa-chevron-down w3-chev"></i>
+          </a>
+          <div id="sm-department" class="w3-submenu" role="group" aria-label="Department submenu">
+            <a href="/departments" class="w3-link"><span>Manage Department</span></a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="w3-nav-section">
         <div class="w3-section-title"><i class="fa-solid fa-users"></i> USERS</div>
         <div class="w3-section-rule"></div>
       </div>
@@ -1534,9 +1560,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const DEFAULT_ROUTE_META = {
+    '/hospital/create':             { section:'HOSPITALS',  header:'Hospital',        page:'Create Hospital',            icon:'fa-solid fa-hospital',        direct:false },
+    '/hospital/manage':             { section:'HOSPITALS',  header:'Hospital',        page:'Manage Hospital',            icon:'fa-solid fa-hospital',        direct:false },
+    '/departments/create':          { section:'HOSPITALS',  header:'Department',      page:'Create Department',          icon:'fa-solid fa-building',        direct:false },
     '/campus/manage':                { section:'ACADEMICS', header:'Campus',          page:'Manage Campus',              icon:'fa-solid fa-building-columns', direct:false },
     '/institutions/manage':          { section:'ACADEMICS', header:'Institution',     page:'Manage Institutions',        icon:'fa-solid fa-university',       direct:false },
-    '/departments':                  { section:'ACADEMICS', header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-university',       direct:false },
+    '/departments':                  { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:false },
+    '/departments/manage':          { section:'HOSPITALS',  header:'Department',      page:'Manage Departments',         icon:'fa-solid fa-building',         direct:false },
     '/courses/manage':               { section:'ACADEMICS', header:'Course',          page:'Manage Courses',             icon:'fa-solid fa-book-open',        direct:false },
     '/course-type/manage':           { section:'ACADEMICS', header:'Course',          page:'Course Type',                icon:'fa-solid fa-book-open',        direct:false },
     '/affiliation/manage':           { section:'ACADEMICS', header:'Course',          page:'Manage Affiliation',         icon:'fa-solid fa-book-open',        direct:false },
@@ -1590,6 +1620,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const SECTION_ICONS = {
+    'HOSPITALS':  'fa-solid fa-hospital',
     'ACADEMICS':  'fa-solid fa-graduation-cap',
     'ACCOUNTING': 'fa-solid fa-calculator',
     'USERS':      'fa-solid fa-users',
@@ -1600,11 +1631,12 @@ document.addEventListener('DOMContentLoaded', () => {
     'OTHER':      'fa-solid fa-folder'
   };
 
-  const SECTION_ORDER = ['ACADEMICS','ACCOUNTING','USERS','CONTENT','EXAMS','PRIVILEGES','OPERATIONS','OTHER'];
+  const SECTION_ORDER = ['HOSPITALS','ACADEMICS','ACCOUNTING','USERS','CONTENT','EXAMS','PRIVILEGES','OPERATIONS','OTHER'];
 
   function inferSectionFromName(name){
     const n = safeText(name).toLowerCase();
     if (!n) return 'OTHER';
+    if (/(hospital|clinic|medical center|medical centre|nursing home)/.test(n)) return 'HOSPITALS';
     if (/(campus|institution|course|section|intake|subject|routine|faculty|affiliation|syllabus|study material|academic)/.test(n)) return 'ACADEMICS';
     if (/(account|fees|scholarship|finance)/.test(n)) return 'ACCOUNTING';
     if (/(user|student|people|faculty|staff)/.test(n)) return 'USERS';

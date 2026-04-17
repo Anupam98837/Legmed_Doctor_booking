@@ -2,7 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\DashboardMenuController;
+use App\Http\Controllers\API\HospitalController;
 use App\Http\Controllers\API\PagePrivilegeController;
 use App\Http\Controllers\API\RolePrivilegeController;
 use App\Http\Controllers\API\UserController;
@@ -109,6 +111,31 @@ Route::middleware('checkAuth')->group(function () {
         Route::post('/assign', [RolePrivilegeController::class, 'assign']);
         Route::post('/unassign', [RolePrivilegeController::class, 'unassign']);
         Route::delete('/', [RolePrivilegeController::class, 'destroy']);
+    });
+
+    Route::prefix('departments')->group(function () {
+        Route::get('/', [DepartmentController::class, 'index']);
+        Route::get('/all', [DepartmentController::class, 'all']);
+        Route::get('/archived', [DepartmentController::class, 'archived']);
+        Route::get('/bin', [DepartmentController::class, 'bin']);
+        Route::post('/', [DepartmentController::class, 'store']);
+        Route::get('/{identifier}', [DepartmentController::class, 'show']);
+        Route::match(['put', 'patch'], '/{identifier}', [DepartmentController::class, 'update']);
+        Route::delete('/{identifier}', [DepartmentController::class, 'destroy']);
+        Route::post('/{identifier}/restore', [DepartmentController::class, 'restore']);
+        Route::delete('/{identifier}/force', [DepartmentController::class, 'forceDelete']);
+    });
+
+    Route::prefix('hospitals')->group(function () {
+        Route::get('/', [HospitalController::class, 'index']);
+        Route::get('/all', [HospitalController::class, 'all']);
+        Route::get('/bin', [HospitalController::class, 'bin']);
+        Route::post('/', [HospitalController::class, 'store']);
+        Route::get('/{identifier}', [HospitalController::class, 'show']);
+        Route::match(['put', 'patch'], '/{identifier}', [HospitalController::class, 'update']);
+        Route::delete('/{identifier}', [HospitalController::class, 'destroy']);
+        Route::post('/{identifier}/restore', [HospitalController::class, 'restore']);
+        Route::delete('/{identifier}/force', [HospitalController::class, 'forceDelete']);
     });
 
     Route::get('/role/sidebar-menus', [RolePrivilegeController::class, 'sidebarMenusForRole']);
