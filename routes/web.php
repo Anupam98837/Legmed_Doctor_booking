@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Controllers\PublicDirectoryController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'pages.auth.login');
+Route::get('/', [PublicDirectoryController::class, 'home'])->name('directory.home');
+Route::get('/login', fn () => view('pages.auth.login'))->name('login');
+Route::get('/find-doctors/departments', [PublicDirectoryController::class, 'departments'])->name('directory.departments.index');
+Route::get('/find-doctors/departments/{slug}', [PublicDirectoryController::class, 'departmentShow'])->name('directory.departments.show');
+Route::get('/doctor/{slug}', [PublicDirectoryController::class, 'doctorShow'])->name('directory.doctors.show');
 
 Route::view('/dashboard', 'pages.pages.common.dashboard');
 Route::view('/profile', 'pages.pages.user.profile');
