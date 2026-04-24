@@ -78,6 +78,10 @@
           </div>
 
           <div class="landing-profile-actions">
+            <button type="button" class="landing-profile-book-trigger js-open-book-modal" aria-label="Book now" title="Book now">
+              <i class="fa-solid fa-calendar-plus"></i>
+              <span>Book Now</span>
+            </button>
             <button type="button" class="landing-profile-call-trigger js-open-call-modal" aria-label="Call now" title="Call now">
               <i class="fa-solid fa-phone-volume"></i>
               <span>Call Now</span>
@@ -316,6 +320,40 @@
     </div>
   </div>
 
+  <div class="landing-call-modal" id="doctorBookingModal" aria-hidden="true">
+    <div class="landing-call-card" role="dialog" aria-modal="true" aria-labelledby="doctorBookingModalTitle">
+      <div class="landing-call-card-head">
+        <div class="landing-call-brand">
+          <img src="{{ $callLogo }}" alt="{{ $doctor['name'] }}">
+          <div>
+            <strong id="doctorBookingModalTitle">Book {{ $doctor['name'] }}</strong>
+            <span>Booking module status</span>
+          </div>
+        </div>
+        <button type="button" class="landing-call-close js-close-book-modal" aria-label="Close booking modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="landing-call-card-body">
+        <div class="landing-book-success is-visible" id="doctorBookingSuccess">
+          <div class="landing-book-success-icon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="landing-book-alert is-success is-visible">Login active. Registration already completed.</div>
+          <div>
+            <h3>Booking screen coming soon</h3>
+            <p>Your account session is active, so this doctor is ready for the next booking step as soon as the full appointment screen is connected.</p>
+          </div>
+          <button type="button" class="landing-btn landing-btn-light js-close-book-modal">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to doctor profile</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   @if($similarDoctors->isNotEmpty())
     <section class="landing-section">
       <div class="landing-section-head">
@@ -356,10 +394,16 @@ document.addEventListener('DOMContentLoaded', function () {
   const tabButtons = Array.from(document.querySelectorAll('.landing-tab-btn'));
   const tabPanels = Array.from(document.querySelectorAll('.landing-tab-panel'));
   const callModal = document.getElementById('doctorCallModal');
+  const bookingModal = document.getElementById('doctorBookingModal');
   const openCallBtn = document.querySelector('.js-open-call-modal');
   const closeCallBtn = document.querySelector('.js-close-call-modal');
+  const openBookBtns = Array.from(document.querySelectorAll('.js-open-book-modal'));
+  const closeBookBtns = Array.from(document.querySelectorAll('.js-close-book-modal'));
   const copyBtn = document.getElementById('doctorCallCopyBtn');
   const callNumberEl = document.getElementById('doctorCallNumber');
+  const authCheckUrl = '{{ url('/api/auth/check') }}';
+  const currentUrl = new URL(window.location.href);
+  const bookReturnUrl = currentUrl.pathname + '?book=1';
 
   function activateTab(targetId) {
     tabButtons.forEach((btn) => {
@@ -371,35 +415,104 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-    tabButtons.forEach((btn) => {
-      btn.addEventListener('click', function () {
-        activateTab(btn.dataset.tabTarget);
-      });
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', function () {
+      activateTab(btn.dataset.tabTarget);
     });
+  });
+
+  function syncBodyLock() {
+    const hasOpenModal = [callModal, bookingModal].some((modal) => modal?.classList.contains('is-open'));
+    document.body.style.overflow = hasOpenModal ? 'hidden' : '';
+  }
 
   function openCallModal() {
     if (!callModal) return;
     callModal.classList.add('is-open');
     callModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    syncBodyLock();
   }
 
   function closeCallModal() {
     if (!callModal) return;
     callModal.classList.remove('is-open');
     callModal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    syncBodyLock();
+  }
+
+  function openBookingModal() {
+    if (!bookingModal) return;
+    bookingModal.classList.add('is-open');
+    bookingModal.setAttribute('aria-hidden', 'false');
+    syncBodyLock();
+  }
+
+  function closeBookingModal() {
+    if (!bookingModal) return;
+    bookingModal.classList.remove('is-open');
+    bookingModal.setAttribute('aria-hidden', 'true');
+    syncBodyLock();
+  }
+
+  function getAuthToken() {
+    return sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+  }
+
+  function redirectToRegister() {
+    window.location.assign('/register?redirect=' + encodeURIComponent(bookReturnUrl));
+  }
+
+  async function verifyActiveSession() {
+    const token = getAuthToken();
+    if (!token) return false;
+
+    try {
+      const response = await fetch(authCheckUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+      });
+
+      if (!response.ok) {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('role');
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   openCallBtn?.addEventListener('click', openCallModal);
   closeCallBtn?.addEventListener('click', closeCallModal);
+  openBookBtns.forEach((btn) => btn.addEventListener('click', async function () {
+    const isActive = await verifyActiveSession();
+    if (!isActive) {
+      redirectToRegister();
+      return;
+    }
+
+    openBookingModal();
+  }));
+  closeBookBtns.forEach((btn) => btn.addEventListener('click', closeBookingModal));
 
   callModal?.addEventListener('click', function (event) {
     if (event.target === callModal) closeCallModal();
   });
 
+  bookingModal?.addEventListener('click', function (event) {
+    if (event.target === bookingModal) closeBookingModal();
+  });
+
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') closeCallModal();
+    if (event.key !== 'Escape') return;
+    closeCallModal();
+    closeBookingModal();
   });
 
   copyBtn?.addEventListener('click', async function () {
@@ -421,6 +534,17 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 1400);
     }
   });
+
+  if (currentUrl.searchParams.get('book') === '1') {
+    verifyActiveSession().then((isActive) => {
+      if (isActive) {
+        openBookingModal();
+        currentUrl.searchParams.delete('book');
+        const nextUrl = currentUrl.pathname + (currentUrl.search ? currentUrl.search : '');
+        window.history.replaceState({}, '', nextUrl);
+      }
+    });
+  }
 });
 </script>
 @endsection

@@ -247,12 +247,24 @@ class UserController extends Controller
     {
         Log::info('[Patient Register] begin', ['ip' => $request->ip()]);
 
-        $v = Validator::make($request->all(), [
+        $rules = [
             'name'         => 'required|string|max:255',
             'email'        => 'required|email|max:255',
             'phone_number' => 'required|string|max:32',
-            'password'     => 'required|string|min:8|confirmed',
-        ]);
+            'source'       => 'nullable|string|max:100',
+            'doctor_slug'  => 'nullable|string|max:190',
+            'doctor_uuid'  => 'nullable|string|max:64',
+            'doctor_name'  => 'nullable|string|max:255',
+        ];
+
+        if ($request->filled('password') || $request->filled('password_confirmation')) {
+            $rules['password'] = 'required|string|min:8|confirmed';
+            $rules['password_confirmation'] = 'required|string|min:8';
+        } else {
+            $rules['password'] = 'nullable|string|min:8';
+        }
+
+        $v = Validator::make($request->all(), $rules);
 
         if ($v->fails()) {
             $this->logActivity(
@@ -280,6 +292,7 @@ class UserController extends Controller
         }
 
         $data = $v->validated();
+        $password = !empty($data['password']) ? (string) $data['password'] : Str::random(32);
 
         if (DB::table('users')->where('email', $data['email'])->whereNull('deleted_at')->exists()) {
             return response()->json([
@@ -309,6 +322,21 @@ class UserController extends Controller
         [$role, $roleShort] = $this->normalizeRole('patient', null);
 
         $now = now();
+        $metadata = [
+            'timezone' => 'Asia/Kolkata',
+            'source'   => (string) ($data['source'] ?? 'patient_register_api'),
+        ];
+        $successMessage = Str::contains((string) $metadata['source'], ['auth_register', 'account_register'])
+            ? 'Account created successfully'
+            : 'Patient registered successfully';
+
+        if (!empty($data['doctor_slug']) || !empty($data['doctor_uuid']) || !empty($data['doctor_name'])) {
+            $metadata['booking_context'] = array_filter([
+                'doctor_slug' => (string) ($data['doctor_slug'] ?? ''),
+                'doctor_uuid' => (string) ($data['doctor_uuid'] ?? ''),
+                'doctor_name' => (string) ($data['doctor_name'] ?? ''),
+            ], fn ($value) => $value !== '');
+        }
 
         try {
             DB::table('users')->insert([
@@ -316,7 +344,7 @@ class UserController extends Controller
                 'name'            => $name,
                 'email'           => $data['email'],
                 'phone_number'    => $data['phone_number'],
-                'password'        => Hash::make($data['password']),
+                'password'        => Hash::make($password),
                 'role'            => $role,
                 'role_short_form' => $roleShort,
                 'slug'            => $slug,
@@ -326,10 +354,7 @@ class UserController extends Controller
                 'created_at'      => $now,
                 'created_at_ip'   => $request->ip(),
                 'updated_at'      => $now,
-                'metadata'        => json_encode([
-                    'timezone' => 'Asia/Kolkata',
-                    'source'   => 'patient_register_api',
-                ], JSON_UNESCAPED_UNICODE),
+                'metadata'        => json_encode($metadata, JSON_UNESCAPED_UNICODE),
             ]);
 
             $user       = DB::table('users')->where('email', $data['email'])->first();
@@ -374,7 +399,7 @@ class UserController extends Controller
 
             return response()->json([
                 'status'       => 'success',
-                'message'      => 'Patient registered successfully',
+                'message'      => $successMessage,
                 'access_token' => $plainToken,
                 'token_type'   => 'Bearer',
                 'expires_at'   => $expiresAt->toIso8601String(),

@@ -736,11 +736,32 @@
       transform:translateY(-1px);
       color:#fff;
     }
+    .landing-profile-book-trigger{
+      min-height:44px;
+      border:1px solid rgba(15,50,81,.10);
+      border-radius:999px;
+      background:#fff;
+      color:var(--landing-ink);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:0 16px;
+      box-shadow:0 12px 24px rgba(15,50,81,.08);
+    }
+    .landing-profile-book-trigger:hover{
+      transform:translateY(-1px);
+      color:var(--landing-ink);
+      background:#f7fbff;
+    }
     .landing-profile-actions{
-      display:flex;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
       width:100%;
     }
-    .landing-profile-actions .landing-profile-call-trigger{
+    .landing-profile-actions .landing-profile-call-trigger,
+    .landing-profile-actions .landing-profile-book-trigger{
       width:100%;
     }
     .landing-profile-head{
@@ -975,6 +996,52 @@
     .landing-call-note a{
       color:var(--landing-accent);
       text-decoration:none;
+    }
+    .landing-book-alert{
+      display:none;
+      padding:12px 14px;
+      border-radius:16px;
+      font-size:.9rem;
+      line-height:1.55;
+    }
+    .landing-book-alert.is-visible{
+      display:block;
+    }
+    .landing-book-alert.is-error{
+      background:rgba(220,53,69,.08);
+      border:1px solid rgba(220,53,69,.14);
+      color:#a52834;
+    }
+    .landing-book-alert.is-success{
+      background:rgba(16,179,163,.10);
+      border:1px solid rgba(16,179,163,.18);
+      color:#08785e;
+    }
+    .landing-book-success{
+      display:none;
+      gap:16px;
+    }
+    .landing-book-success.is-visible{
+      display:grid;
+    }
+    .landing-book-success-icon{
+      width:64px;
+      height:64px;
+      border-radius:22px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,rgba(14,122,196,.12),rgba(16,179,163,.14));
+      color:var(--landing-accent);
+      font-size:1.5rem;
+    }
+    .landing-book-success h3{
+      margin:0;
+      color:var(--landing-ink);
+    }
+    .landing-book-success p{
+      margin:0;
+      color:var(--landing-copy);
+      line-height:1.7;
     }
     .landing-profile-content{
       display:grid;
@@ -1495,6 +1562,10 @@
       }
 
       .landing-profile-meta-row{
+        grid-template-columns:1fr;
+      }
+
+      .landing-profile-actions{
         grid-template-columns:1fr;
       }
 

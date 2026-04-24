@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Login - Doctor Booking</title>
+  <title>Register - Doctor Booking</title>
   <meta name="csrf-token" content="{{ csrf_token() }}"/>
 
   <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/images/web/favicon.png') }}">
@@ -52,10 +52,10 @@
     .ux-brand-side{
       background:linear-gradient(160deg, #123a5b 0%, #14557d 58%, #0da58f 100%);
       color:#fff;
-      padding:clamp(28px,5vw,56px);
+      padding:clamp(20px,4vw,42px);
       display:flex;
-      align-items:center;
-      justify-content:center;
+      align-items:flex-start;
+      justify-content:flex-start;
       position:relative;
       overflow:hidden;
     }
@@ -89,6 +89,9 @@
       position:relative;
       z-index:1;
       width:min(440px,100%);
+      margin-left:auto;
+      margin-right:auto;
+      margin-top:18px;
     }
 
     .ux-brand-head{
@@ -302,22 +305,7 @@
       cursor:pointer;
     }
 
-    .ux-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin:2px 0 18px;
-    }
-
-    .ux-row a{
-      color:var(--ux-primary);
-      text-decoration:none;
-      font-weight:700;
-    }
-
-    .ux-login{
+    .ux-register{
       width:100%;
       min-height:54px;
       border:0;
@@ -330,9 +318,16 @@
       transition:transform .18s ease, filter .18s ease;
     }
 
-    .ux-login:hover{
+    .ux-register:hover{
       transform:translateY(-1px);
       filter:brightness(.99);
+    }
+
+    .ux-note{
+      margin-top:14px;
+      color:var(--ux-copy);
+      font-size:.85rem;
+      line-height:1.6;
     }
 
     .ux-footer{
@@ -354,7 +349,6 @@
       }
 
       .ux-brand-side{
-        min-height:auto;
         padding:24px 20px;
       }
 
@@ -384,6 +378,10 @@
 
       .ux-brand-side{
         padding:20px 16px 18px;
+      }
+
+      .ux-brand-inner{
+        margin-top:8px;
       }
 
       .ux-brand-head{
@@ -425,17 +423,17 @@
         </div>
         <div class="ux-brand-copy">
           <strong>Doctor Booking</strong>
-          <span>Simple patient access</span>
+          <span>Quick account setup</span>
         </div>
       </div>
 
-      <span class="ux-kicker"><i class="fa-solid fa-shield-heart"></i> Secure Login</span>
-      <h1 class="ux-brand-title">Log in and continue your booking flow.</h1>
-      <p class="ux-brand-text">Use your registered email or phone number to access your account and return to the next step.</p>
+      <span class="ux-kicker"><i class="fa-solid fa-user-plus"></i> Register</span>
+      <h1 class="ux-brand-title">Create your account first.</h1>
+      <p class="ux-brand-text">This step is only for user registration. Patient details and booking information can come later.</p>
 
       <div class="ux-brand-pills">
-        <span><i class="fa-solid fa-check"></i> Fast access</span>
-        <span><i class="fa-solid fa-check"></i> Session based</span>
+        <span><i class="fa-solid fa-check"></i> Minimal form</span>
+        <span><i class="fa-solid fa-check"></i> Booking later</span>
       </div>
     </div>
   </aside>
@@ -447,48 +445,69 @@
       </div>
 
       <section class="ux-card">
-        <h2 class="ux-card-title">Welcome back</h2>
-        <p class="ux-card-copy">Enter your credentials.</p>
+        <h2 class="ux-card-title">Create account</h2>
+        <p class="ux-card-copy">Register your account.</p>
 
-        <form id="ux_form" action="/login" method="post" novalidate>
-          @csrf
+        <form id="ux_register_form" novalidate>
+          <input type="hidden" id="ux_source" value="auth_register_page">
 
           <div id="ux_alert" class="ux-alert alert d-none" role="alert"></div>
 
           <div class="ux-field">
-            <label class="ux-label" for="ux_id_or_email">Email or Phone Number</label>
+            <label class="ux-label" for="ux_name">Full Name</label>
             <div class="ux-input-wrap">
               <i class="ux-field-icon fa-solid fa-user"></i>
-              <input id="ux_id_or_email" type="text" class="ux-control" name="identifier" placeholder="you@example.com or 90000 00000" required>
+              <input id="ux_name" type="text" class="ux-control" placeholder="Enter your full name" autocomplete="name" required>
             </div>
           </div>
 
           <div class="ux-field">
-            <label class="ux-label" for="ux_pw">Password</label>
+            <label class="ux-label" for="ux_email">Email Address</label>
+            <div class="ux-input-wrap">
+              <i class="ux-field-icon fa-solid fa-envelope"></i>
+              <input id="ux_email" type="email" class="ux-control" placeholder="you@example.com" autocomplete="email" required>
+            </div>
+          </div>
+
+          <div class="ux-field">
+            <label class="ux-label" for="ux_phone">Phone Number</label>
+            <div class="ux-input-wrap">
+              <i class="ux-field-icon fa-solid fa-phone"></i>
+              <input id="ux_phone" type="tel" class="ux-control" placeholder="90000 00000" autocomplete="tel" required>
+            </div>
+          </div>
+
+          <div class="ux-field">
+            <label class="ux-label" for="ux_password">Password</label>
             <div class="ux-input-wrap">
               <i class="ux-field-icon fa-solid fa-lock"></i>
-              <input id="ux_pw" type="password" class="ux-control with-eye" name="password" placeholder="Enter your password" minlength="8" required>
+              <input id="ux_password" type="password" class="ux-control with-eye" placeholder="Enter password" minlength="8" autocomplete="new-password" required>
               <button type="button" class="ux-eye" id="ux_togglePw" aria-label="Toggle password visibility">
                 <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
               </button>
             </div>
           </div>
 
-          <div class="ux-row">
-            <div class="form-check m-0">
-              <input class="form-check-input" type="checkbox" id="ux_keep">
-              <label class="form-check-label" for="ux_keep">Keep me logged in</label>
+          <div class="ux-field">
+            <label class="ux-label" for="ux_password_confirm">Confirm Password</label>
+            <div class="ux-input-wrap">
+              <i class="ux-field-icon fa-solid fa-shield"></i>
+              <input id="ux_password_confirm" type="password" class="ux-control with-eye" placeholder="Repeat password" minlength="8" autocomplete="new-password" required>
+              <button type="button" class="ux-eye" id="ux_togglePwConfirm" aria-label="Toggle confirm password visibility">
+                <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
+              </button>
             </div>
-            <a href="/forgot-password">Forgot password?</a>
           </div>
 
-          <button class="ux-login" id="ux_btn" type="submit">
-            <span class="me-2"><i class="fa-solid fa-right-to-bracket"></i></span> Login
+          <button class="ux-register" id="ux_btn" type="submit">
+            <span class="me-2"><i class="fa-solid fa-user-plus"></i></span> Create Account
           </button>
 
+          <div class="ux-note">Patient and appointment details can be added later in the booking process.</div>
+
           <div class="ux-footer">
-            Don’t have an account?
-            <a href="/register" id="ux_register_link">Create one</a>
+            Already have an account?
+            <a href="/login" id="ux_login_link">Login</a>
           </div>
         </form>
       </section>
@@ -498,19 +517,21 @@
 
 <script>
   (function(){
-    const LOGIN_API = "/api/auth/login";
+    const REGISTER_API = "/api/auth/register";
     const CHECK_API = "/api/auth/check";
 
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-    const form = document.getElementById('ux_form');
-    const emailIn = document.getElementById('ux_id_or_email');
-    const pwIn = document.getElementById('ux_pw');
-    const keepCb = document.getElementById('ux_keep');
+    const form = document.getElementById('ux_register_form');
+    const nameIn = document.getElementById('ux_name');
+    const emailIn = document.getElementById('ux_email');
+    const phoneIn = document.getElementById('ux_phone');
+    const passwordIn = document.getElementById('ux_password');
+    const passwordConfirmIn = document.getElementById('ux_password_confirm');
+    const sourceIn = document.getElementById('ux_source');
     const btn = document.getElementById('ux_btn');
     const alertEl = document.getElementById('ux_alert');
-    const toggle = document.getElementById('ux_togglePw');
-    const registerLink = document.getElementById('ux_register_link');
+    const loginLink = document.getElementById('ux_login_link');
+    const togglePw = document.getElementById('ux_togglePw');
+    const togglePwConfirm = document.getElementById('ux_togglePwConfirm');
     const redirectParam = new URLSearchParams(window.location.search).get('redirect') || '';
 
     function resolveNextPath(fallback){
@@ -519,15 +540,28 @@
       return redirectParam;
     }
 
-    if (registerLink && redirectParam && redirectParam.startsWith('/')) {
-      registerLink.href = '/register?redirect=' + encodeURIComponent(redirectParam);
+    if (loginLink && redirectParam && redirectParam.startsWith('/')) {
+      loginLink.href = '/login?redirect=' + encodeURIComponent(redirectParam);
+    }
+
+    function rolePath(role){
+      const r = (role || '').toString().trim().toLowerCase();
+      if (!r) return '/dashboard';
+      return '/dashboard';
+    }
+
+    function authStoreSet(token, role){
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('role', role);
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
     }
 
     function setBusy(isBusy){
       btn.disabled = isBusy;
       btn.innerHTML = isBusy
-        ? '<i class="fa-solid fa-spinner fa-spin me-2"></i>Signing you in...'
-        : '<span class="me-2"><i class="fa-solid fa-right-to-bracket"></i></span> Login';
+        ? '<i class="fa-solid fa-spinner fa-spin me-2"></i>Creating account...'
+        : '<span class="me-2"><i class="fa-solid fa-user-plus"></i></span> Create Account';
     }
 
     function showAlert(kind, msg){
@@ -541,48 +575,19 @@
       alertEl.textContent = '';
     }
 
-    const authStore = {
-      set(token, role, keep){
-        sessionStorage.setItem('token', token);
-        sessionStorage.setItem('role', role);
-        if (keep) {
-          localStorage.setItem('token', token);
-          localStorage.setItem('role', role);
-        } else {
-          localStorage.removeItem('token');
-          localStorage.removeItem('role');
-        }
-      },
-      clear(){
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('role');
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-      },
-      getLocal(){
-        return {
-          token: localStorage.getItem('token'),
-          role: localStorage.getItem('role')
-        };
-      }
-    };
-
-    function rolePath(role){
-      const r = (role || '').toString().trim().toLowerCase();
-      if (!r) return '/dashboard';
-      return '/dashboard';
+    function toggleField(button, field){
+      button?.addEventListener('click', () => {
+        const show = field.type === 'password';
+        field.type = show ? 'text' : 'password';
+        button.innerHTML = show
+          ? '<i class="fa-regular fa-eye" aria-hidden="true"></i>'
+          : '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
+      });
     }
 
-    toggle?.addEventListener('click', () => {
-      const show = pwIn.type === 'password';
-      pwIn.type = show ? 'text' : 'password';
-      toggle.innerHTML = show
-        ? '<i class="fa-regular fa-eye" aria-hidden="true"></i>'
-        : '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>';
-    });
-
     async function tryAutoLoginFromLocal(){
-      const { token, role } = authStore.getLocal();
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+      const role = sessionStorage.getItem('role') || localStorage.getItem('role');
       if (!token) return;
 
       try {
@@ -591,64 +596,77 @@
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok && data && data.user) {
-          const resolvedRole = (data.user.role || role || '').toString().toLowerCase();
-          authStore.set(token, resolvedRole, true);
+          const resolvedRole = (data.user.role || role || 'patient').toString().toLowerCase();
+          sessionStorage.setItem('token', token);
+          sessionStorage.setItem('role', resolvedRole);
           window.location.replace(resolveNextPath(rolePath(resolvedRole)));
-        } else {
-          authStore.clear();
         }
       } catch (error) {
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      tryAutoLoginFromLocal();
-    });
+    toggleField(togglePw, passwordIn);
+    toggleField(togglePwConfirm, passwordConfirmIn);
+    document.addEventListener('DOMContentLoaded', tryAutoLoginFromLocal);
 
     form?.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearAlert();
 
-      const identifier = (emailIn.value || '').trim();
-      const password = pwIn.value || '';
-      const keep = !!keepCb.checked;
+      const payload = {
+        name: (nameIn.value || '').trim(),
+        email: (emailIn.value || '').trim(),
+        phone_number: (phoneIn.value || '').trim(),
+        password: passwordIn.value || '',
+        password_confirmation: passwordConfirmIn.value || '',
+        source: sourceIn.value || 'auth_register_page',
+      };
 
-      if (!identifier || !password) {
-        showAlert('error', 'Please enter both email or phone number and password.');
+      if (!payload.name || !payload.email || !payload.phone_number || !payload.password || !payload.password_confirmation) {
+        showAlert('error', 'Please complete all fields.');
+        return;
+      }
+
+      if (payload.password.length < 8) {
+        showAlert('error', 'Password must be at least 8 characters.');
+        return;
+      }
+
+      if (payload.password !== payload.password_confirmation) {
+        showAlert('error', 'Password confirmation does not match.');
         return;
       }
 
       setBusy(true);
+
       try {
-        const res = await fetch(LOGIN_API, {
+        const res = await fetch(REGISTER_API, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrf
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ login: identifier, password, remember: keep })
+          body: JSON.stringify(payload)
         });
 
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          const msg = data?.message || data?.error || (data?.errors ? Object.values(data.errors).flat().join(', ') : 'Unable to log in.');
+          const msg = data?.message || data?.error || (data?.errors ? Object.values(data.errors).flat().join(', ') : 'Unable to create account.');
           showAlert('error', msg);
-          setBusy(false);
           return;
         }
 
         const token = data?.access_token || data?.token || '';
-        const role = (data?.user?.role || localStorage.getItem('role') || 'patient').toLowerCase();
+        const role = (data?.user?.role || 'patient').toLowerCase();
 
         if (!token) {
           showAlert('error', 'No token received from server.');
-          setBusy(false);
           return;
         }
 
-        authStore.set(token, role, keep);
-        showAlert('success', 'Login successful. Redirecting...');
+        authStoreSet(token, role);
+        showAlert('success', data?.message || 'Account created successfully. Redirecting...');
         setTimeout(() => {
           window.location.assign(resolveNextPath(rolePath(role)));
         }, 500);

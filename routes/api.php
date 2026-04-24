@@ -20,6 +20,7 @@ Route::get('/user', function (Request $request) {
 Route::prefix('auth')->group(function () {
     // public
     Route::post('/login', [UserController::class, 'login']);
+    Route::post('/register', [UserController::class, 'patientRegister']);
     Route::post('/patient-register', [UserController::class, 'patientRegister']);
 
     // optional backward compatibility

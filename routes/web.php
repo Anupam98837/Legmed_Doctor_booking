@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicDirectoryController::class, 'home'])->name('directory.home');
 Route::get('/login', fn () => view('pages.auth.login'))->name('login');
+Route::get('/register', fn () => view('pages.auth.register'))->name('register');
 Route::get('/find-doctors/departments', [PublicDirectoryController::class, 'departments'])->name('directory.departments.index');
 Route::get('/find-doctors/departments/{slug}', [PublicDirectoryController::class, 'departmentShow'])->name('directory.departments.show');
 Route::get('/doctor/{slug}', [PublicDirectoryController::class, 'doctorShow'])->name('directory.doctors.show');
